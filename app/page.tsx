@@ -1,120 +1,324 @@
-
 "use client";
 
 import { useState } from "react";
-import { Cinzel } from "next/font/google";
+import { Cinzel, Montserrat } from "next/font/google";
 
-const cinzel = Cinzel({ subsets: ["latin"], weight: ["700"] });
+const titleFont = Cinzel({
+  subsets:["latin"],
+  weight:["700"],
+});
 
-export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false);
+const textFont = Montserrat({
+  subsets:["latin"],
+  weight:["400","600","700"],
+});
 
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        textAlign: "center",
-        color: "white",
-        position: "relative",
-        overflow: "hidden",
-        backgroundImage:
-          "linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.45)),url('/images/volmerra.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        padding: "20px",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backdropFilter: "blur(8px)",
-          background: "rgba(0,0,0,.15)",
-          pointerEvents: "none",
-        }}
-      />
 
-      <button
-        onClick={() => setMenuOpen(!menuOpen)}
-        style={{
-          position: "fixed",
-          top: 20,
-          left: 20,
-          zIndex: 1001,
-          fontSize: 34,
-          background: "#3b2412",
-          color: "#f3d27b",
-          border: "2px solid #b98a2e",
-          borderRadius: 12,
-          padding: "10px 14px",
-          cursor: "pointer",
-        }}
-      >
-        📜
-      </button>
+export default function Home(){
 
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: menuOpen ? 0 : "-320px",
-          width: 320,
-          height: "100vh",
-          background: "#1a120c",
-          borderRight: "3px solid #b98a2e",
-          transition: "left .3s ease",
-          zIndex: 1000,
-          padding: "90px 24px 24px",
-          boxSizing: "border-box",
-        }}
-      >
-        <h2 className={cinzel.className} style={{ color: "#d6a62a" }}>
-          Volmerra
-        </h2>
-        {["📖 Hikaye","🗺️ Harita","👥 Karakterler","💎 Taşlar","🌍 Bölgeler"].map(i=>(
-          <div key={i} style={{padding:"14px 0",fontSize:20,borderBottom:"1px solid #4b3929"}}>
-            {i}
-          </div>
-        ))}
-      </div>
+const [search,setSearch]=useState("");
+const [hover,setHover]=useState("");
 
-      <div style={{position:"relative",zIndex:2,maxWidth:900}}>
-        <h1
-          className={cinzel.className}
-          style={{
-            fontSize: "clamp(52px,10vw,110px)",
-            color: "#d69e25",
-            letterSpacing: 8,
-            textShadow: "0 4px 12px black",
-          }}
-        >
-          Volmerra I
-        </h1>
+const menu=[
+{title:"📖 Hikayeler",link:"/hikaye"},
+{title:"🗺️ Harita",link:"/harita"},
+{title:"💎 Taşlar",link:"/taslar"},
+{title:"👥 Karakterler",link:"/karakterler"},
+];
 
-        <p style={{fontSize:"clamp(16px,2vw,22px)"}}>
-          Fanilerin, Büyülülerin ve Efsanelerin Dünyası
-        </p>
 
-        <button
-          style={{
-            marginTop:30,
-            padding:"14px 28px",
-            fontSize:20,
-            borderRadius:14,
-            border:"2px solid #8a5a00",
-            background:"linear-gradient(45deg,#8a5a00,#d69e25)",
-            fontWeight:"bold",
-            cursor:"pointer",
-          }}
-        >
-          Volmerra'ya Katıl!
-        </button>
-      </div>
-    </main>
-  );
+const episodes=[
+"S3 B4 - Anne ve Üç Kızı",
+"S3 B3 - Raven",
+"S3 B2 - Yanardağ"
+];
+
+
+return(
+
+<main
+className={textFont.className}
+style={{
+minHeight:"100vh",
+background:"#fff",
+color:"#3b2412",
+}}
+>
+
+
+<header
+
+style={{
+position:"fixed",
+top:0,
+left:0,
+width:"100%",
+height:85,
+background:"white",
+display:"flex",
+alignItems:"center",
+justifyContent:"space-between",
+padding:"0 40px",
+boxShadow:"0 5px 20px rgba(0,0,0,.15)",
+zIndex:100,
+}}
+
+>
+
+
+<h1
+className={titleFont.className}
+style={{
+color:"#b98a2e",
+fontSize:30,
+}}
+>
+📜 Volmerra
+</h1>
+
+
+
+<input
+
+value={search}
+
+onChange={(e)=>setSearch(e.target.value)}
+
+placeholder="🔍 Volmerra'da ara..."
+
+style={{
+width:350,
+padding:12,
+borderRadius:20,
+border:"2px solid #b98a2e",
+outline:"none",
+fontSize:16,
+}}
+
+/>
+
+
+
+
+<nav
+
+style={{
+display:"flex",
+alignItems:"center",
+gap:15,
+}}
+
+>
+
+
+{menu.map(item=>(
+
+<button
+
+key={item.title}
+
+onMouseEnter={()=>setHover(item.title)}
+onMouseLeave={()=>setHover("")}
+
+onClick={()=>window.location.href=item.link}
+
+style={{
+border:"none",
+background:hover===item.title?"#b98a2e":"white",
+color:hover===item.title?"white":"#3b2412",
+padding:"12px 15px",
+borderRadius:10,
+cursor:"pointer",
+transition:".2s",
+fontWeight:600,
+}}
+
+>
+
+{item.title}
+
+</button>
+
+))}
+
+
+
+<button
+
+onMouseEnter={()=>setHover("hesap")}
+onMouseLeave={()=>setHover("")}
+
+style={{
+border:"2px solid #b98a2e",
+background:hover==="hesap"?"#b98a2e":"white",
+color:hover==="hesap"?"white":"#b98a2e",
+padding:"12px 18px",
+borderRadius:10,
+cursor:"pointer",
+fontWeight:700,
+}}
+
+>
+
+Hesap Oluştur
+
+</button>
+
+
+
+</nav>
+
+
+
+</header>
+
+
+
+
+
+
+<section
+
+style={{
+paddingTop:150,
+textAlign:"center",
+}}
+
+>
+
+
+<h2
+
+className={titleFont.className}
+
+style={{
+fontSize:80,
+color:"#b98a2e",
+}}
+
+>
+
+Volmerra I
+
+</h2>
+
+
+
+<p
+style={{
+fontSize:22,
+}}
+>
+Fanilerin, Büyülülerin ve Efsanelerin Dünyası
+</p>
+
+
+
+</section>
+
+
+
+
+
+
+
+<section
+
+style={{
+padding:"50px",
+}}
+
+>
+
+
+<h2
+
+className={titleFont.className}
+style={{
+fontSize:40,
+}}
+>
+
+📖 Son Bölümler
+
+</h2>
+
+
+
+
+<div
+
+style={{
+display:"grid",
+gridTemplateColumns:"repeat(3,1fr)",
+gap:25,
+marginTop:30,
+}}
+
+>
+
+
+{episodes.map((ep,i)=>(
+
+<div
+
+key={ep}
+
+style={{
+height:250,
+border:"2px solid #b98a2e",
+borderRadius:15,
+background:"#fafafa",
+cursor:"pointer",
+transition:".3s",
+}}
+
+onMouseEnter={(e)=>{
+e.currentTarget.style.transform="translateY(-8px)";
+e.currentTarget.style.boxShadow="0 10px 25px rgba(185,138,46,.4)";
+}}
+
+onMouseLeave={(e)=>{
+e.currentTarget.style.transform="translateY(0)";
+e.currentTarget.style.boxShadow="none";
+}}
+
+>
+
+
+<div
+style={{
+height:"70%",
+background:"#ddd",
+}}
+>
+
+
+</div>
+
+
+<h3>
+{ep}
+</h3>
+
+
+</div>
+
+))}
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+</main>
+
+
+)
+
 }
-
