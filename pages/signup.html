@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign up — VOLMERRA</title>
+  <meta name="description" content="Create your Volmerra reader account.">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/seasons.js"></script>
+  <script src="../assets/js/season.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <div class="container page-hero">
+      <p class="eyebrow">Join Volmerra</p>
+      <h1>Create your account</h1>
+      <p class="page-lede">
+        Free to join. Your account keeps your reading progress, favorites and saved
+        chapters — privately, for you alone.
+      </p>
+    </div>
+
+    <section class="section section--tight" style="padding-bottom: clamp(56px, 10vw, 104px);">
+      <div class="container">
+        <form class="form-card" id="signup-form" novalidate>
+          <p class="form-error" role="alert"></p>
+
+          <div class="field">
+            <label for="signup-name">Display name</label>
+            <input type="text" id="signup-name" name="displayName" autocomplete="nickname" required>
+            <span class="field-hint">Shown on your profile and, later, next to your comments.</span>
+          </div>
+
+          <div class="field">
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" name="email" autocomplete="email" required>
+          </div>
+
+          <div class="field">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" name="password" autocomplete="new-password" required>
+            <span class="field-hint">At least 8 characters.</span>
+          </div>
+
+          <button class="btn btn--primary btn--block" type="submit">Sign up</button>
+
+          <p class="form-footer">
+            Already have an account? <a href="login.html">Log in</a>
+          </p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/search.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/forms.js"></script>
+</body>
+</html>

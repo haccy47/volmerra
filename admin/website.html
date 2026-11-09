@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Website — VOLMERRA Admin</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/seasons.js"></script>
+  <script src="../assets/js/season.js"></script>
+</head>
+<body data-admin-page="website">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="site-header"></div>
+  <nav class="admin-nav" id="admin-nav" aria-label="Admin sections"></nav>
+
+  <main id="main">
+    <div class="container page-hero">
+      <p class="eyebrow">Admin</p>
+      <h1>Website</h1>
+      <p class="page-lede">
+        Featured content, seasonal settings, homepage sections and announcements.
+      </p>
+    </div>
+
+    <section class="section section--tight" style="padding-bottom: clamp(56px, 10vw, 104px);">
+      <div class="container">
+
+        <div id="admin-denied" hidden>
+          <div class="empty-state" id="denied-text"></div>
+          <p class="content-note" style="text-align: center;">
+            <a href="../pages/login.html" style="text-decoration: underline;">Log in</a>
+          </p>
+        </div>
+
+        <div id="admin-claim" hidden>
+          <div class="form-card">
+            <h2 style="font-size: 1.25rem; margin-bottom: var(--space-3);">First-run setup</h2>
+            <p class="card-text">
+              This preview build has no backend yet, so administrator access is
+              provisioned locally: the first signed-in account to claim ownership
+              becomes the site administrator, and the claim is closed afterwards.
+              In production, administrator roles must be granted and every admin
+              operation must be authorized server-side.
+            </p>
+            <div class="avatar-row">
+              <button class="btn btn--primary" type="button" id="claim-admin">Claim administrator access</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="admin-panel" hidden>
+          <form class="member-panel" id="website-form" style="margin-bottom: var(--space-5);" novalidate>
+            <div class="member-panel-head">
+              <h2>Featured content</h2>
+            </div>
+
+            <div class="field">
+              <label for="featured-chapter">Featured chapter</label>
+              <select id="featured-chapter"></select>
+            </div>
+
+            <div class="field">
+              <label for="featured-character">Featured character</label>
+              <select id="featured-character"></select>
+            </div>
+
+            <div class="member-panel-head" style="margin-top: var(--space-5);">
+              <h2>Announcement</h2>
+            </div>
+            <div class="field">
+              <label for="announcement-text">Text</label>
+              <textarea id="announcement-text" placeholder="Site-wide announcement, e.g. a new chapter is coming."></textarea>
+            </div>
+            <div class="field">
+              <label style="display: flex; align-items: center; gap: var(--space-2); font-size: 0.9375rem;">
+                <input type="checkbox" id="announcement-visible" style="width: auto;">
+                Show the announcement on the website
+              </label>
+            </div>
+
+            <button class="btn btn--primary" type="submit">Save featured content &amp; announcement</button>
+            <p class="content-note" id="website-saved" hidden></p>
+            <p class="content-note">
+              Prototype note: featured content and announcements are stored in the
+              data layer. The public homepage will consume these settings when the
+              public pages are wired to it — public pages are not modified in this
+              task.
+            </p>
+          </form>
+
+          <div class="member-panel" style="margin-bottom: var(--space-5);">
+            <div class="member-panel-head">
+              <h2>Homepage sections</h2>
+            </div>
+            <div id="sections-list"></div>
+            <p class="content-note">
+              Reorder or hide the homepage sections. Like the featured content,
+              this takes effect on the public homepage once it is wired to the
+              data layer.
+            </p>
+          </div>
+
+          <div class="member-panel">
+            <div class="member-panel-head">
+              <h2>Seasonal settings</h2>
+            </div>
+            <div class="field">
+              <label for="default-season">Active season (accent color)</label>
+              <select id="default-season"></select>
+              <span class="field-hint">
+                Applies immediately across the whole website. Individual visitors
+                can also pick a season with the picker in the footer.
+              </span>
+            </div>
+            <div class="member-panel-head" style="margin-top: var(--space-4);">
+              <h2>Season palette</h2>
+            </div>
+            <div class="swatch-row">
+              <span class="swatch"><span class="swatch-color" style="background:#e4bc54;"></span>S1</span>
+              <span class="swatch"><span class="swatch-color" style="background:#54265f;"></span>S2</span>
+              <span class="swatch"><span class="swatch-color" style="background:#a5dceb;"></span>S3</span>
+              <span class="swatch"><span class="swatch-color" style="background:#d52e38;"></span>S4</span>
+              <span class="swatch"><span class="swatch-color" style="background:#20bfd0;"></span>S5</span>
+              <span class="swatch"><span class="swatch-color" style="background:#c49a42;"></span>S6</span>
+              <span class="swatch"><span class="swatch-color" style="background:#243b75;"></span>S7</span>
+              <span class="swatch"><span class="swatch-color" style="background:#6d7178;"></span>S8</span>
+            </div>
+            <p class="content-note">
+              Accent colors are defined once in the design tokens; adding or
+              changing a season palette is a token change, not a redesign.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/chapters.js"></script>
+  <script src="../assets/js/cms.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/search.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>

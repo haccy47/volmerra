@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account Settings — VOLMERRA</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/seasons.js"></script>
+  <script src="../assets/js/season.js"></script>
+</head>
+<body data-page="settings">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <!-- Hidden until the session guard in forms.js confirms a signed-in reader -->
+    <section id="settings-section" hidden>
+      <div class="container page-hero">
+        <p class="eyebrow">Account Settings</p>
+        <h1>Settings</h1>
+        <p class="page-lede"><a href="account.html">&larr; Back to Your Account</a></p>
+      </div>
+
+      <section class="section section--tight" style="padding-bottom: clamp(56px, 10vw, 104px);">
+        <div class="container">
+          <div class="profile-layout">
+
+            <div class="profile-head">
+              <div id="profile-avatar"></div>
+              <div>
+                <h2 class="profile-name">Account</h2>
+                <p class="profile-email" id="profile-email"></p>
+              </div>
+            </div>
+
+            <form class="member-panel" id="profile-form" style="margin-bottom: var(--space-5);" novalidate>
+              <div class="member-panel-head">
+                <h2>Display name</h2>
+              </div>
+              <p class="form-error" role="alert"></p>
+              <div class="field">
+                <label for="profile-name">Display name</label>
+                <input type="text" id="profile-name" name="displayName" autocomplete="nickname" required>
+              </div>
+              <button class="btn btn--primary" type="submit">Save changes</button>
+            </form>
+
+            <div class="member-panel" style="margin-bottom: var(--space-5);">
+              <div class="member-panel-head">
+                <h2>Profile picture</h2>
+              </div>
+              <div class="avatar-row">
+                <label class="btn btn--ghost btn--sm">
+                  Choose image
+                  <input type="file" id="profile-avatar-input" accept="image/*" hidden>
+                </label>
+                <button class="btn btn--ghost btn--sm" type="button" id="profile-avatar-remove">Remove</button>
+              </div>
+              <p class="content-note">
+                Images are automatically resized for the site and stored with
+                your account locally in this preview build.
+              </p>
+            </div>
+
+            <div class="member-panel" style="margin-bottom: var(--space-5);">
+              <div class="member-panel-head">
+                <h2>Notifications</h2>
+              </div>
+              <div class="field">
+                <label style="display: flex; align-items: center; gap: var(--space-2); font-size: 0.9375rem;">
+                  <input type="checkbox" id="settings-notifications" style="width: auto;">
+                  Chapter release notifications
+                </label>
+              </div>
+              <p class="content-note">
+                Stored per account in this preview build. Real delivery
+                (email/push) while you are offline requires the backend.
+              </p>
+            </div>
+
+            <div class="member-panel" style="margin-bottom: var(--space-5);">
+              <div class="member-panel-head">
+                <h2>Password &amp; email</h2>
+              </div>
+              <p class="content-note">
+                Changing your email or password requires server-side account
+                management. This preview build keeps accounts locally in the
+                browser and does not pretend these controls work — they will
+                be added with the backend.
+              </p>
+            </div>
+
+            <div class="member-panel" style="margin-bottom: var(--space-5);">
+              <div class="member-panel-head">
+                <h2>Privacy &amp; security</h2>
+              </div>
+              <p class="content-note">
+                Privacy and security settings (session management, data
+                export) will be enforced server-side in the backend. Client-side
+                toggles alone would not protect anything, so none are
+                simulated here.
+              </p>
+            </div>
+
+            <div class="member-panel">
+              <div class="member-panel-head">
+                <h2>Session</h2>
+              </div>
+              <div class="avatar-row">
+                <button class="btn btn--ghost sign-out" type="button">Sign out</button>
+              </div>
+              <p class="content-note">
+                Signing out ends the session on this device. Your library stays
+                with your account.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/store.js"></script>
+  <script src="../assets/js/chapters.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/search.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/forms.js"></script>
+</body>
+</html>

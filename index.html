@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en" data-root="">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VOLMERRA — The official home of the story universe</title>
+  <meta name="description" content="VOLMERRA is the official website of a fictional story universe. Read published chapters, explore the characters and follow the story.">
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/seasons.js"></script>
+  <script src="assets/js/season.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <!-- Cinematic countdown hero (shown when a chapter is ≤7 days out) -->
+    <section id="hero-countdown" hidden>
+      <div class="cinema-hero hero-countdown">
+        <div class="cinema-hero-media" id="countdown-media"></div>
+        <div class="cinema-hero-overlay"></div>
+        <div class="cinema-hero-info">
+          <p class="hero-countdown-label">YENİ BÖLÜM YAKINDA</p>
+          <h1 class="cinema-hero-title" id="countdown-title"></h1>
+          <p class="cinema-hero-desc" id="countdown-meta"></p>
+          <div class="countdown" id="countdown-timer" role="timer" aria-label="Yayına kalan süre">
+            <div class="count-unit"><span class="count-value" id="cd-days">00</span><span class="count-label">GÜN</span></div>
+            <span class="count-sep">:</span>
+            <div class="count-unit"><span class="count-value" id="cd-hours">00</span><span class="count-label">SAAT</span></div>
+            <span class="count-sep">:</span>
+            <div class="count-unit"><span class="count-value" id="cd-minutes">00</span><span class="count-label">DAKİKA</span></div>
+            <span class="count-sep">:</span>
+            <div class="count-unit"><span class="count-value" id="cd-seconds">00</span><span class="count-label">SANİYE</span></div>
+          </div>
+          <div class="hero-countdown-cta">
+            <a class="btn btn--ghost" href="pages/story.html">Bölümleri Gör</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feature hero (newly published chapter) -->
+    <section id="hero-feature" hidden>
+      <div class="cinema-hero">
+        <div class="cinema-hero-media" id="feature-media"></div>
+        <div class="cinema-hero-overlay"></div>
+        <div class="cinema-hero-info">
+          <p class="hero-countdown-label">YENİ BÖLÜM</p>
+          <h1 class="cinema-hero-title" id="feature-title"></h1>
+          <p class="cinema-hero-desc" id="feature-meta"></p>
+          <div class="hero-feature-actions">
+            <a class="btn btn--primary btn--cta" id="feature-cta" href="#">Okumaya Başla</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upcoming teaser (>7 days out): normal hero stays -->
+    <section id="hero-upcoming" hidden>
+      <div class="container">
+        <div class="card hero-upcoming-card">
+          <span class="badge">YENİ BÖLÜM YAKINDA</span>
+          <div class="hero-upcoming-body">
+            <div>
+              <p class="row-title" id="upcoming-title"></p>
+              <p class="row-meta" id="upcoming-meta"></p>
+            </div>
+            <div class="countdown countdown--strip" id="upcoming-timer" role="timer" aria-label="Yayına kalan süre">
+              <div class="count-unit"><span class="count-value" id="up-days">00</span><span class="count-label">GÜN</span></div>
+              <span class="count-sep">:</span>
+              <div class="count-unit"><span class="count-value" id="up-hours">00</span><span class="count-label">SAAT</span></div>
+              <span class="count-sep">:</span>
+              <div class="count-unit"><span class="count-value" id="up-minutes">00</span><span class="count-label">DAKİKA</span></div>
+              <span class="count-sep">:</span>
+              <div class="count-unit"><span class="count-value" id="up-seconds">00</span><span class="count-label">SANİYE</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SON YAYINLANAN BÖLÜM — latest published chapter, kept separate
+         from the gallery; updates automatically on every publication -->
+    <section id="latest-chapter" hidden>
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">SON YAYINLANAN BÖLÜM</p>
+            <h2>Latest chapter</h2>
+          </div>
+        </div>
+        <div id="latest-chapter-body"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         GUEST HOMEPAGE — shown when no session exists
+         ====================================================== -->
+    <section id="home-guest" hidden>
+
+      <!-- Hero -->
+      <div class="container hero">
+        <p class="eyebrow">The official website</p>
+        <h1 class="hero-title">VOLMERRA</h1>
+        <p class="hero-sub">
+          The official home of a single, continuing story universe — its chapters,
+          its characters and its world. Original content is being prepared and will
+          be published here.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn--ghost" href="pages/login.html">Log in</a>
+          <a class="btn btn--primary" href="pages/signup.html">Sign up</a>
+        </div>
+        <p class="hero-meta">Free to join. Readers with an account can save progress, keep a library and join the conversation.</p>
+      </div>
+
+      <!-- Introduction -->
+      <section class="section">
+        <div class="container">
+          <div class="intro-grid">
+            <p class="lead">
+              One universe. One continuing story. Everything published about Volmerra
+              will live in this one place.
+            </p>
+            <div class="intro-copy">
+              <p>
+                Volmerra is not a series of separate books — it is a single universe
+                told in chapters. This website is its official home: where chapters are
+                published, where the characters and the world are documented, and where
+                readers follow the story as it grows.
+              </p>
+              <p>
+                <span class="badge">Placeholder</span>
+                This introduction will be replaced with the official introduction to the
+                Volmerra universe once original story material is provided.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Featured story -->
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Featured</p>
+              <h2>The featured story</h2>
+            </div>
+          </div>
+          <div class="featured">
+            <div class="featured-media">
+              <div class="placeholder placeholder--media">Featured artwork placeholder — no official artwork provided yet</div>
+            </div>
+            <div class="featured-body">
+              <span class="badge">Placeholder</span>
+              <h3>The featured story will appear here</h3>
+              <p class="card-text">
+                When the story is ready, this section presents the current featured
+                story with its description and the chapters published so far.
+              </p>
+              <a class="btn btn--ghost" href="pages/story.html">Visit the Story section</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chapter cover gallery -->
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Chapters</p>
+              <h2>Chapter gallery</h2>
+            </div>
+            <a class="head-link" href="pages/story.html">All chapters</a>
+          </div>
+          <div id="chapter-gallery-guest" class="chapter-gallery"></div>
+        </div>
+      </section>
+
+      <!-- Character highlights -->
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">People of the universe</p>
+              <h2>Character highlights</h2>
+            </div>
+            <a class="head-link" href="pages/characters.html">All characters</a>
+          </div>
+          <div class="grid-3">
+            <div class="card character-card">
+              <div class="placeholder placeholder--square">Portrait placeholder</div>
+              <h3>Character profile</h3>
+              <p class="card-meta">Placeholder — no official character material provided yet</p>
+            </div>
+            <div class="card character-card">
+              <div class="placeholder placeholder--square">Portrait placeholder</div>
+              <h3>Character profile</h3>
+              <p class="card-meta">Placeholder — no official character material provided yet</p>
+            </div>
+            <div class="card character-card">
+              <div class="placeholder placeholder--square">Portrait placeholder</div>
+              <h3>Character profile</h3>
+              <p class="card-meta">Placeholder — no official character material provided yet</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Links to the main sections -->
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Explore</p>
+              <h2>The universe, section by section</h2>
+            </div>
+          </div>
+          <div class="grid-2">
+            <a class="card quick-card" href="pages/story.html">
+              <h3>Story</h3>
+              <p class="card-text">The story and its published chapters.</p>
+              <p class="quick-arrow">Open &rarr;</p>
+            </a>
+            <a class="card quick-card" href="pages/characters.html">
+              <h3>Characters</h3>
+              <p class="card-text">Profiles of the people of the Volmerra universe.</p>
+              <p class="quick-arrow">Open &rarr;</p>
+            </a>
+            <a class="card quick-card" href="pages/universe.html">
+              <h3>Universe</h3>
+              <p class="card-text">The world, its places and its ideas.</p>
+              <p class="quick-arrow">Open &rarr;</p>
+            </a>
+            <a class="card quick-card" href="pages/places.html">
+              <h3>Places</h3>
+              <p class="card-text">Regions and locations of the universe.</p>
+              <p class="quick-arrow">Open &rarr;</p>
+            </a>
+            <a class="card quick-card" href="pages/gallery.html">
+              <h3>Gallery</h3>
+              <p class="card-text">Official artwork and visual material.</p>
+              <p class="quick-arrow">Open &rarr;</p>
+            </a>
+            <a class="card quick-card" href="pages/about.html">
+              <h3>About</h3>
+              <p class="card-text">What this website is and how it works.</p>
+              <p class="quick-arrow">Open &rarr;</p>
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </section>
+
+    <!-- ======================================================
+         AUTHENTICATED HOMEPAGE — shown when a session exists
+         ====================================================== -->
+    <section id="home-member" hidden>
+
+      <div class="container member-greeting">
+        <p class="eyebrow">Your reading home</p>
+        <h1>Welcome back, <span id="member-name"></span></h1>
+        <p id="member-sub"></p>
+      </div>
+
+      <div class="container">
+        <div class="member-grid">
+
+          <!-- Continue Reading -->
+          <div class="member-panel">
+            <div class="member-panel-head">
+              <h2>Continue reading</h2>
+            </div>
+            <div id="continue-reading"></div>
+          </div>
+
+          <!-- Chapter cover gallery -->
+          <div class="member-panel">
+            <div class="member-panel-head">
+              <h2>Chapter gallery</h2>
+              <a class="head-link" href="pages/story.html">All chapters</a>
+            </div>
+            <div id="chapter-gallery-member" class="chapter-gallery"></div>
+          </div>
+
+          <!-- Personal library -->
+          <div class="member-panel">
+            <div class="member-panel-head">
+              <h2>Your library</h2>
+            </div>
+            <div class="library-stats">
+              <div class="stat">
+                <p class="stat-value" id="stat-favorites">0</p>
+                <p class="stat-label">Favori Bölümler</p>
+              </div>
+              <div class="stat">
+                <p class="stat-value" id="stat-saved">0</p>
+                <p class="stat-label">Kaydedilen Bölümler</p>
+              </div>
+              <div class="stat">
+                <p class="stat-value" id="stat-history">0</p>
+                <p class="stat-label">Chapters in history</p>
+              </div>
+            </div>
+            <p class="content-note">
+              Your progress, favorites, saved chapters and reading history are kept
+              privately for your account only.
+            </p>
+          </div>
+
+          <!-- Favori Bölümler -->
+          <div class="member-panel">
+            <div class="member-panel-head">
+              <h2>Favori Bölümler</h2>
+            </div>
+            <div id="favorites-list" class="library-cards"></div>
+          </div>
+
+          <!-- Kaydedilen Bölümler -->
+          <div class="member-panel">
+            <div class="member-panel-head">
+              <h2>Kaydedilen Bölümler</h2>
+            </div>
+            <div id="saved-list" class="library-cards"></div>
+          </div>
+
+          <!-- Reading history -->
+          <div class="member-panel">
+            <div class="member-panel-head">
+              <h2>Reading history</h2>
+            </div>
+            <div id="history-list"></div>
+          </div>
+
+        </div>
+
+        <!-- Quick access -->
+        <div class="section-head" style="margin-top: clamp(40px, 7vw, 72px);">
+          <div>
+            <p class="eyebrow">Quick access</p>
+            <h2>Jump back into the universe</h2>
+          </div>
+        </div>
+        <div class="quick-grid" style="padding-bottom: clamp(40px, 7vw, 72px);">
+          <a class="card quick-card" href="pages/characters.html">
+            <h3>Characters</h3>
+            <p class="card-text">Browse the profiles of the universe's people.</p>
+            <p class="quick-arrow">Open &rarr;</p>
+          </a>
+          <a class="card quick-card" href="pages/universe.html">
+            <h3>Universe</h3>
+            <p class="card-text">Explore the world behind the story.</p>
+            <p class="quick-arrow">Open &rarr;</p>
+          </a>
+          <a class="card quick-card" href="pages/account.html">
+            <h3>Your profile</h3>
+            <p class="card-text">Display name, profile picture and account.</p>
+            <p class="quick-arrow">Open &rarr;</p>
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/chapters.js"></script>
+  <script src="assets/js/cms.js"></script>
+  <script src="assets/js/notifications.js"></script>
+  <script src="assets/js/search.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/home.js"></script>
+</body>
+</html>

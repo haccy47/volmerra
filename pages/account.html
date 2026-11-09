@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Account — VOLMERRA</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/seasons.js"></script>
+  <script src="../assets/js/season.js"></script>
+</head>
+<body data-page="account">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <!-- Hidden until the session guard in forms.js confirms a signed-in reader -->
+    <section id="account-section" hidden>
+      <div class="container page-hero">
+        <p class="eyebrow">Your Account</p>
+        <h1 id="account-name"></h1>
+        <p class="page-lede" id="account-email"></p>
+      </div>
+
+      <section class="section section--tight" style="padding-bottom: clamp(56px, 10vw, 104px);">
+        <div class="container">
+          <div class="profile-layout">
+
+            <div class="profile-head">
+              <div id="profile-avatar"></div>
+              <div>
+                <h2 class="profile-name">Reader profile</h2>
+                <a class="head-link" href="settings.html">Account Settings &rarr;</a>
+              </div>
+            </div>
+
+            <form class="member-panel" id="account-bio-form" style="margin-bottom: var(--space-5);" novalidate>
+              <div class="member-panel-head">
+                <h2>Bio</h2>
+              </div>
+              <p class="form-error" role="alert"></p>
+              <div class="field">
+                <label for="account-bio">Short bio</label>
+                <textarea id="account-bio" placeholder="A line or two about you as a reader…"></textarea>
+              </div>
+              <button class="btn btn--primary" type="submit">Save bio</button>
+            </form>
+
+            <div class="member-panel" style="margin-bottom: var(--space-5);">
+              <div class="member-panel-head">
+                <h2>Reading statistics</h2>
+              </div>
+              <div class="library-stats">
+                <div class="stat">
+                  <p class="stat-value" id="stat-chapters-read">0</p>
+                  <p class="stat-label">Chapters opened</p>
+                </div>
+                <div class="stat">
+                  <p class="stat-value" id="stat-completed">0</p>
+                  <p class="stat-label">Completed</p>
+                </div>
+                <div class="stat">
+                  <p class="stat-value" id="stat-favorites">0</p>
+                  <p class="stat-label">Favori Bölümler</p>
+                </div>
+                <div class="stat">
+                  <p class="stat-value" id="stat-saved">0</p>
+                  <p class="stat-label">Kaydedilen Bölümler</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="member-panel">
+              <div class="member-panel-head">
+                <h2>Your library</h2>
+              </div>
+              <div class="menu-actions">
+                <a class="btn btn--ghost btn--block" href="../index.html">Continue Reading &amp; History</a>
+                <a class="btn btn--ghost btn--block" href="settings.html">Account Settings</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/store.js"></script>
+  <script src="../assets/js/chapters.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/search.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/forms.js"></script>
+</body>
+</html>

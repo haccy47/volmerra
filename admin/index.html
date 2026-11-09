@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin dashboard — VOLMERRA</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/seasons.js"></script>
+  <script src="../assets/js/season.js"></script>
+</head>
+<body data-admin-page="dashboard">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="site-header"></div>
+  <nav class="admin-nav" id="admin-nav" aria-label="Admin sections"></nav>
+
+  <main id="main">
+    <div class="container page-hero">
+      <p class="eyebrow">Admin</p>
+      <h1>Dashboard</h1>
+      <p class="page-lede">
+        The Volmerra management system at a glance — chapters, characters,
+        universe entries and the people who read them.
+      </p>
+    </div>
+
+    <section class="section section--tight" style="padding-bottom: clamp(56px, 10vw, 104px);">
+      <div class="container">
+
+        <div id="admin-denied" hidden>
+          <div class="empty-state" id="denied-text"></div>
+          <p class="content-note" style="text-align: center;">
+            <a href="../pages/login.html" style="text-decoration: underline;">Log in</a>
+          </p>
+        </div>
+
+        <div id="admin-claim" hidden>
+          <div class="form-card">
+            <h2 style="font-size: 1.25rem; margin-bottom: var(--space-3);">First-run setup</h2>
+            <p class="card-text">
+              This preview build has no backend yet, so administrator access is
+              provisioned locally: the first signed-in account to claim ownership
+              becomes the site administrator, and the claim is closed afterwards.
+              In production, administrator roles must be granted and every admin
+              operation must be authorized server-side.
+            </p>
+            <div class="avatar-row">
+              <button class="btn btn--primary" type="button" id="claim-admin">Claim administrator access</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="admin-panel" hidden>
+          <div class="library-stats">
+            <div class="stat">
+              <p class="stat-value" id="stat-published">0</p>
+              <p class="stat-label">Published chapters</p>
+            </div>
+            <div class="stat">
+              <p class="stat-value" id="stat-drafts">0</p>
+              <p class="stat-label">Draft chapters</p>
+            </div>
+            <div class="stat">
+              <p class="stat-value" id="stat-characters">0</p>
+              <p class="stat-label">Characters</p>
+            </div>
+            <div class="stat">
+              <p class="stat-value" id="stat-users">0</p>
+              <p class="stat-label">Registered users</p>
+            </div>
+          </div>
+
+          <div class="member-panel" style="margin-top: var(--space-5);">
+            <div class="member-panel-head">
+              <h2>Quick access</h2>
+            </div>
+            <div class="grid-2">
+              <a class="card quick-card" href="chapters.html">
+                <h3>Chapters</h3>
+                <p class="card-text">Manage, publish and organize every chapter.</p>
+                <p class="quick-arrow">Open &rarr;</p>
+              </a>
+              <a class="card quick-card" href="chapter.html">
+                <h3>Publish new chapter</h3>
+                <p class="card-text">Upload a .txt, add cover and description.</p>
+                <p class="quick-arrow">Open &rarr;</p>
+              </a>
+              <a class="card quick-card" href="characters.html">
+                <h3>Characters</h3>
+                <p class="card-text">Profiles, images and seasons.</p>
+                <p class="quick-arrow">Open &rarr;</p>
+              </a>
+              <a class="card quick-card" href="locations.html">
+                <h3>Locations</h3>
+                <p class="card-text">Places, regions and imagery.</p>
+                <p class="quick-arrow">Open &rarr;</p>
+              </a>
+              <a class="card quick-card" href="lore.html">
+                <h3>Universe &amp; Lore</h3>
+                <p class="card-text">History, mythology, powers, stones and systems.</p>
+                <p class="quick-arrow">Open &rarr;</p>
+              </a>
+              <a class="card quick-card" href="gallery.html">
+                <h3>Gallery</h3>
+                <p class="card-text">Images, descriptions and categories.</p>
+                <p class="quick-arrow">Open &rarr;</p>
+              </a>
+              <a class="card quick-card" href="publishing.html">
+                <h3>Publishing</h3>
+                <p class="card-text">Drafts, published and scheduled chapters.</p>
+                <p class="quick-arrow">Open &rarr;</p>
+              </a>
+              <a class="card quick-card" href="website.html">
+                <h3>Website</h3>
+                <p class="card-text">Featured content, sections and announcements.</p>
+                <p class="quick-arrow">Open &rarr;</p>
+              </a>
+              <a class="card quick-card" href="community.html">
+                <h3>Community</h3>
+                <p class="card-text">Users, comments and reported content.</p>
+                <p class="quick-arrow">Open &rarr;</p>
+              </a>
+            </div>
+          </div>
+
+          <div class="member-panel" style="margin-top: var(--space-5);">
+            <div class="member-panel-head">
+              <h2>Upcoming scheduled chapters</h2>
+              <a class="head-link" href="publishing.html">Publishing</a>
+            </div>
+            <div id="scheduled-list"></div>
+          </div>
+
+          <div class="member-panel" style="margin-top: var(--space-5);">
+            <div class="member-panel-head">
+              <h2>Recent content updates</h2>
+            </div>
+            <div id="activity-list"></div>
+          </div>
+
+          <p class="content-note">
+            Prototype note: this build has no backend. Content is stored through
+            the client-side data layer adapter, scheduled chapters are published
+            manually by an administrator (a server-side scheduler is a future
+            backend feature), and the admin gate is enforced in the client only —
+            it must be authorized server-side in production.
+          </p>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/chapters.js"></script>
+  <script src="../assets/js/cms.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/search.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>

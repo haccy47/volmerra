@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Characters — VOLMERRA Admin</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/seasons.js"></script>
+  <script src="../assets/js/season.js"></script>
+</head>
+<body data-admin-page="collection" data-collection="characters">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="site-header"></div>
+  <nav class="admin-nav" id="admin-nav" aria-label="Admin sections"></nav>
+
+  <main id="main">
+    <div class="container page-hero">
+      <p class="eyebrow">Admin</p>
+      <h1>Characters</h1>
+      <p class="page-lede">
+        Add, edit and organize the characters of the universe — names, images,
+        ages, affiliations and seasons.
+      </p>
+    </div>
+
+    <section class="section section--tight" style="padding-bottom: clamp(56px, 10vw, 104px);">
+      <div class="container">
+
+        <div id="admin-denied" hidden>
+          <div class="empty-state" id="denied-text"></div>
+          <p class="content-note" style="text-align: center;">
+            <a href="../pages/login.html" style="text-decoration: underline;">Log in</a>
+          </p>
+        </div>
+
+        <div id="admin-claim" hidden>
+          <div class="form-card">
+            <h2 style="font-size: 1.25rem; margin-bottom: var(--space-3);">First-run setup</h2>
+            <p class="card-text">
+              This preview build has no backend yet, so administrator access is
+              provisioned locally: the first signed-in account to claim ownership
+              becomes the site administrator, and the claim is closed afterwards.
+              In production, administrator roles must be granted and every admin
+              operation must be authorized server-side.
+            </p>
+            <div class="avatar-row">
+              <button class="btn btn--primary" type="button" id="claim-admin">Claim administrator access</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="admin-panel" hidden>
+          <div class="member-panel">
+            <div class="member-panel-head">
+              <h2>Manage characters</h2>
+              <button class="btn btn--primary btn--sm" type="button" id="new-item">New character</button>
+            </div>
+            <div id="collection-form" hidden></div>
+            <div id="collection-list"></div>
+          </div>
+          <p class="content-note">
+            Prototype note: characters are stored through the client-side data
+            layer adapter. The public Characters page renders from this
+            collection, showing each character's portrait for the selected
+            season.
+          </p>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/chapters.js"></script>
+  <script src="../assets/js/cms.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/search.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chapter — VOLMERRA</title>
+  <meta name="description" content="A chapter of the Volmerra story.">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/seasons.js"></script>
+  <script src="../assets/js/season.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <!-- Cinematic hero: cover image with title over the bottom-left -->
+    <section id="chapter-hero-section" hidden>
+      <div class="cinema-hero cinema-hero--detail">
+        <div class="cinema-hero-media" id="chapter-hero-media"></div>
+        <div class="cinema-hero-overlay"></div>
+        <div class="cinema-hero-info">
+          <div class="cinema-hero-badges">
+            <span class="badge" id="chapter-number"></span>
+            <span class="badge" id="chapter-season"></span>
+            <span class="badge" id="chapter-status" hidden></span>
+          </div>
+          <h1 class="cinema-hero-title" id="chapter-title"></h1>
+          <p class="cinema-hero-desc" id="chapter-desc"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Clean information section below the hero -->
+    <section class="section section--tight" id="chapter-info-section" hidden>
+      <div class="container chapter-detail">
+        <div class="chapter-detail-facts">
+          <div class="stat">
+            <p class="stat-value stat-value--sm" id="fact-season"></p>
+            <p class="stat-label">Season</p>
+          </div>
+          <div class="stat">
+            <p class="stat-value stat-value--sm" id="fact-number"></p>
+            <p class="stat-label">Chapter</p>
+          </div>
+          <div class="stat" id="fact-published">
+            <p class="stat-value stat-value--sm" id="fact-date"></p>
+            <p class="stat-label">Published</p>
+          </div>
+          <div class="stat" id="fact-reading">
+            <p class="stat-value stat-value--sm" id="fact-time"></p>
+            <p class="stat-label">Reading time</p>
+          </div>
+        </div>
+        <div class="chapter-actions-row">
+          <a class="btn btn--primary btn--cta" id="read-cta" href="#">Okumaya Başla</a>
+          <div class="chapter-actions" id="chapter-actions"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comments (below the chapter information) -->
+    <section class="section section--tight" id="comments-section" hidden>
+      <div class="container">
+        <div id="comments-mount"></div>
+      </div>
+    </section>
+
+    <section id="chapter-error" hidden>
+      <div class="container" style="padding-block: clamp(56px, 10vw, 104px);">
+        <div class="empty-state" id="chapter-error-text"></div>
+        <p class="content-note" style="text-align: center;">
+          <a href="story.html" style="text-decoration: underline;">Back to the Story</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/store.js"></script>
+  <script src="../assets/js/chapters.js"></script>
+  <script src="../assets/js/comments.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/search.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/reader.js"></script>
+  <script src="../assets/js/interactions.js"></script>
+</body>
+</html>

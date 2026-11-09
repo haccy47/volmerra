@@ -1,0 +1,148 @@
+/* ============================================================
+   VOLMERRA — Personal library store (scaffold)
+   ------------------------------------------------------------
+   Stores reading progress, favorites, saved chapters and
+   reading history per user id in localStorage. Like auth.js,
+   this is a client-side scaffold: swap the persistence layer
+   for a backend when one is connected. Chapter records are
+   { id, title, percent } and reference chapters in the
+   chapter data layer (chapters.js).
+
+   prune(userId, validById) removes library references that no
+   longer point at an existing, published, publicly accessible
+   chapter (deleted, unpublished or unreleased-season chapters).
+   Valid progress is never touched or reset.
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  var defaults = function () {
+    return {
+      continueReading: [],
+      history: [],
+      favorites: [],
+      saved: [],
+    };
+  };
+
+  var LIBRARY_LISTS = ["continueReading", "history", "favorites", "saved"];
+
+  function keyFor(userId) {
+    return "volmerra:library:" + userId;
+  }
+
+  function read(userId) {
+    try {
+      var data = JSON.parse(localStorage.getItem(keyFor(userId)));
+      return Object.assign(defaults(), data || {});
+    } catch (e) {
+      return defaults();
+    }
+  }
+
+  function write(userId, library) {
+    localStorage.setItem(keyFor(userId), JSON.stringify(library));
+  }
+
+  function upsert(list, chapter) {
+    var rest = list.filter(function (item) {
+      return item.id !== chapter.id;
+    });
+    rest.unshift(chapter);
+    return rest;
+  }
+
+  window.VolmerraLibrary = {
+    get: read,
+
+    /* Keeps only entries whose id exists in validById. Any truthy
+       value counts as valid (home.js passes { id: chapterObject }),
+       so the previous `=== true` strict check — which silently
+       deleted every valid entry — is gone. The pruned library is
+       persisted and returned. */
+    prune: function (userId, validById) {
+      var library = read(userId);
+      var valid = validById || {};
+      var changed = false;
+      LIBRARY_LISTS.forEach(function (listName) {
+        var kept = library[listName].filter(function (item) {
+          return !!valid[item.id];
+        });
+        if (kept.length !== library[listName].length) {
+          library[listName] = kept;
+          changed = true;
+        }
+      });
+      if (changed) write(userId, library);
+      return library;
+    },
+
+    trackReading: function (userId, chapter) {
+      var library = read(userId);
+      var nowCompleted =
+        Math.max(0, Math.min(100, chapter.percent || 0)) >= 100;
+      /* A chapter stays "completed" once finished, even if the reader
+         opens it again later. */
+      var alreadyCompleted = library.history.some(function (h) {
+        return h.id === chapter.id && h.completed;
+      });
+      var entry = {
+        id: chapter.id,
+        title: chapter.title,
+        percent: Math.max(0, Math.min(100, chapter.percent || 0)),
+        completed: nowCompleted || alreadyCompleted,
+        updatedAt: new Date().toISOString(),
+      };
+      library.continueReading = upsert(library.continueReading, entry);
+      library.continueReading = library.continueReading.slice(0, 5);
+      if (nowCompleted) {
+        /* Finished: out of Continue Reading, kept in History as
+           completed. */
+        library.continueReading = library.continueReading.filter(function (item) {
+          return item.id !== entry.id;
+        });
+      }
+      library.history = upsert(library.history, entry).slice(0, 50);
+      write(userId, library);
+      return library;
+    },
+
+    toggleFavorite: function (userId, chapter) {
+      return toggleList(userId, "favorites", chapter);
+    },
+
+    toggleSaved: function (userId, chapter) {
+      return toggleList(userId, "saved", chapter);
+    },
+
+    isFavorite: function (userId, chapterId) {
+      return read(userId).favorites.some(function (item) {
+        return item.id === chapterId;
+      });
+    },
+
+    isSaved: function (userId, chapterId) {
+      return read(userId).saved.some(function (item) {
+        return item.id === chapterId;
+      });
+    },
+  };
+
+  function toggleList(userId, listName, chapter) {
+    var library = read(userId);
+    var entry = { id: chapter.id, title: chapter.title, updatedAt: new Date().toISOString() };
+    var exists = library[listName].some(function (item) {
+      return item.id === entry.id;
+    });
+    if (exists) {
+      library[listName] = library[listName].filter(function (item) {
+        return item.id !== entry.id;
+      });
+    } else {
+      library[listName] = upsert(library[listName], entry);
+    }
+    write(userId, library);
+    return library;
+  }
+})();

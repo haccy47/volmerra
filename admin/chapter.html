@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Publish a chapter — VOLMERRA</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/theme.js"></script>
+  <script src="../assets/js/seasons.js"></script>
+  <script src="../assets/js/season.js"></script>
+</head>
+<body data-admin-page="chapter-form">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="site-header"></div>
+  <nav class="admin-nav" id="admin-nav" aria-label="Admin sections"></nav>
+
+  <main id="main">
+    <div class="container page-hero">
+      <p class="eyebrow">Admin</p>
+      <h1 id="form-heading">Publish new chapter</h1>
+      <p class="page-lede">
+        The chapter number is generated automatically from the season, so running
+        order is always correct. <a href="index.html" style="text-decoration: underline;">Back to the dashboard</a>.
+      </p>
+    </div>
+
+    <section class="section section--tight" style="padding-bottom: clamp(56px, 10vw, 104px);">
+      <div class="container">
+        <form class="form-card form-card--wide" id="chapter-form" novalidate>
+          <p class="form-error" role="alert"></p>
+
+          <div class="field">
+            <label for="form-title">Chapter title</label>
+            <input type="text" id="form-title" required>
+          </div>
+
+          <div class="field">
+            <label for="form-cover-input">Chapter cover</label>
+            <div class="avatar-row">
+              <img id="cover-preview" class="cover-preview" hidden alt="Chapter cover preview">
+              <div id="cover-empty" class="cover-preview placeholder">No cover uploaded</div>
+            </div>
+            <div class="avatar-row">
+              <label class="btn btn--ghost btn--sm">
+                Upload cover
+                <input type="file" id="form-cover-input" accept="image/*" hidden>
+              </label>
+              <button class="btn btn--ghost btn--sm" type="button" id="cover-replace" hidden>Replace image</button>
+              <button class="btn btn--ghost btn--sm" type="button" id="cover-remove" hidden>Remove</button>
+            </div>
+            <span class="field-hint">
+              Photos are automatically resized and optimized for the site.
+              The cover appears on the homepage gallery, the chapter hero and
+              the reading flow.
+            </span>
+          </div>
+
+          <div class="field">
+            <label for="form-description">Chapter description</label>
+            <textarea id="form-description" placeholder="Short introduction or summary of the chapter."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="form-season">Season</label>
+            <select id="form-season">
+              <option value="">Select season…</option>
+            </select>
+            <span class="field-hint">
+              Locked once the chapter is created — the season is part of its number
+              and is preserved on edit.
+            </span>
+          </div>
+
+          <div class="field">
+            <label for="form-number-input">Chapter number</label>
+            <div class="number-editor">
+              <input
+                type="number"
+                id="form-number-input"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                placeholder="—"
+              >
+              <span class="number-output" id="form-number" aria-live="polite">—</span>
+            </div>
+            <span class="field-hint">
+              Prefilled with the next free number in the season — but you can
+              set any whole number instead (e.g. S1B4). The full code updates
+              automatically. Numbers must stay unique within a season.
+            </span>
+          </div>
+
+          <div class="field">
+            <label for="form-content-input">Chapter content (.txt)</label>
+            <div class="avatar-row">
+              <label class="btn btn--ghost btn--sm">
+                Upload .txt file
+                <input type="file" id="form-content-input" accept=".txt,text/plain" hidden>
+              </label>
+              <button class="btn btn--ghost btn--sm" type="button" id="content-replace" hidden>Replace file</button>
+            </div>
+            <div id="content-empty" class="placeholder" style="margin-top: var(--space-3);">No content uploaded yet</div>
+            <div id="content-preview" class="content-preview" hidden style="margin-top: var(--space-3);"></div>
+            <span class="field-hint">
+              Plain text. Paragraph breaks (blank lines) and line breaks are
+              preserved. Check the preview before publishing.
+            </span>
+          </div>
+
+          <div class="field">
+            <label for="form-schedule">Schedule publication</label>
+            <input type="datetime-local" id="form-schedule">
+            <span class="field-hint">
+              Prototype: the chapter is marked scheduled and shows a countdown in
+              the Publishing section. Automatic publishing at that time requires a
+              server-side scheduler in the future backend.
+            </span>
+          </div>
+
+          <div class="avatar-row">
+            <button class="btn btn--primary" type="submit" id="publish-btn">Publish chapter</button>
+            <button class="btn btn--ghost" type="button" id="schedule-btn">Schedule</button>
+            <button class="btn btn--ghost" type="button" id="draft-btn">Save as draft</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/notifications.js"></script>
+  <script src="../assets/js/chapters.js"></script>
+  <script src="../assets/js/cms.js"></script>
+  <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/search.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>
