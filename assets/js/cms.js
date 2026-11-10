@@ -224,6 +224,89 @@
       });
     },
 
+    /* One-time migration: pushes the collections that were saved in
+       this browser's localStorage (from before a backend was
+       connected) into the current storage adapter. Merged by entry
+       id — items that already exist in the backend are kept
+       untouched. Settings are merged: the backend keeps its values,
+       empty/default keys are filled from the local copy. The legacy
+       "comments" collection is skipped (comments now live in their
+       own backend table). */
+    importLocalBackup: function () {
+      var raw = null;
+      try {
+        raw = localStorage.getItem(STORAGE_KEY);
+      } catch (e) {}
+      if (!raw) return Promise.resolve({ items: 0, added: {} });
+      var local;
+      try {
+        local = JSON.parse(raw);
+      } catch (e) {
+        return Promise.reject(
+          new Error("The local CMS backup could not be read.")
+        );
+      }
+      return enqueue(function () {
+        return readState().then(function (state) {
+          var added = {};
+          var importable = COLLECTIONS.filter(function (name) {
+            return name !== "comments";
+          });
+          importable.forEach(function (name) {
+            var localItems = (local[name] || []).filter(function (item) {
+              return item && item.id;
+            });
+            if (!localItems.length) return;
+            var byId = {};
+            (state[name] || []).forEach(function (item) {
+              byId[item.id] = true;
+            });
+            localItems.forEach(function (item) {
+              if (!byId[item.id]) {
+                state[name].push(item);
+                added[name] = (added[name] || 0) + 1;
+              }
+            });
+          });
+          if (local.settings) {
+            var defaults = defaultSettings();
+            Object.keys(local.settings).forEach(function (key) {
+              var backendValue = state.settings[key];
+              var localValue = local.settings[key];
+              if (localValue == null) return;
+              if (key === "sections") {
+                if (
+                  JSON.stringify(backendValue) ===
+                  JSON.stringify(defaults.sections)
+                ) {
+                  state.settings[key] = localValue;
+                }
+                return;
+              }
+              var isEmpty =
+                backendValue == null ||
+                backendValue === false ||
+                (typeof backendValue === "string" && !backendValue) ||
+                (Array.isArray(backendValue) && !backendValue.length) ||
+                (typeof backendValue === "object" &&
+                  !Array.isArray(backendValue) &&
+                  Object.keys(backendValue).length === 0);
+              if (isEmpty) {
+                state.settings[key] = localValue;
+              }
+            });
+          }
+          var total = Object.keys(added).reduce(function (n, k) {
+            return n + added[k];
+          }, 0);
+          if (!total) return { items: 0, added: {} };
+          return adapter.write(state).then(function () {
+            return { items: total, added: added };
+          });
+        });
+      });
+    },
+
     /* Activity log: what was changed in the admin panel, newest first.
        Best-effort: on backends where only administrators may write,
        a public visitor's logging attempt must fail silently. */

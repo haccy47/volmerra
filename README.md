@@ -148,6 +148,14 @@ Setup:
    access"). The claim closes itself after the first admin exists;
    roles are then granted/revoked from the Supabase dashboard
    (`profiles.is_admin`).
+6. **One-time migration**: chapters and CMS entries created before the
+   backend was connected still live in the browser that made them.
+   Open the admin dashboard **on that browser** and use
+   **"Import this browser's data"** — it merges the localStorage
+   chapters/characters/locations/lore/gallery/settings into the
+   database by id (existing backend entries are never overwritten).
+   Every change made *after* the backend is connected syncs to every
+   device automatically.
 
 Security model (enforced by RLS in `supabase/schema.sql`, not by the
 client):

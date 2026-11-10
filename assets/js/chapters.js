@@ -454,6 +454,52 @@
       });
     },
 
+    /* One-time migration: pushes the state that was saved in this
+       browser's localStorage (from before a backend was connected)
+       into the current storage adapter. Merged by chapter id —
+       entries that already exist in the backend are kept untouched,
+       the season counters take the maximum of both sides. */
+    importLocalBackup: function () {
+      var raw = null;
+      try {
+        raw = localStorage.getItem(STORAGE_KEY);
+      } catch (e) {}
+      if (!raw) return Promise.resolve({ chapters: 0 });
+      var local;
+      try {
+        local = JSON.parse(raw);
+      } catch (e) {
+        return Promise.reject(
+          new Error("The local chapter backup could not be read.")
+        );
+      }
+      return enqueue(function () {
+        return readState().then(function (state) {
+          var byId = {};
+          state.chapters.forEach(function (c) {
+            byId[c.id] = true;
+          });
+          var added = 0;
+          (local.chapters || []).forEach(function (c) {
+            if (c && c.id && !byId[c.id]) {
+              state.chapters.push(c);
+              added++;
+            }
+          });
+          Object.keys(local.counters || {}).forEach(function (season) {
+            state.counters[season] = Math.max(
+              state.counters[season] || 0,
+              local.counters[season]
+            );
+          });
+          if (!added) return { chapters: 0 };
+          return adapter.write(state).then(function () {
+            return { chapters: added };
+          });
+        });
+      });
+    },
+
     /* Renders stored TXT content into a node, preserving paragraph
        breaks (blank lines) and line breaks. Built with DOM nodes so
        chapter content is never interpreted as HTML. */

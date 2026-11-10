@@ -127,6 +127,17 @@
             </div>
           </div>
 
+          <div class="member-panel" id="import-panel" hidden style="margin-top: var(--space-5);">
+            <div class="member-panel-head">
+              <h2>Import local data</h2>
+            </div>
+            <p class="content-note" id="import-info"></p>
+            <div class="avatar-row">
+              <button class="btn btn--primary" type="button" id="import-local">Import this browser's data</button>
+            </div>
+            <p class="content-note" id="import-result" hidden></p>
+          </div>
+
           <div class="member-panel" style="margin-top: var(--space-5);">
             <div class="member-panel-head">
               <h2>Upcoming scheduled chapters</h2>
@@ -143,11 +154,10 @@
           </div>
 
           <p class="content-note">
-            Prototype note: this build has no backend. Content is stored through
-            the client-side data layer adapter, scheduled chapters are published
-            manually by an administrator (a server-side scheduler is a future
-            backend feature), and the admin gate is enforced in the client only —
-            it must be authorized server-side in production.
+            Persistence note: with the Supabase backend connected, every change
+            made here is stored in the database and visible on every device.
+            Scheduled chapters are published by the server-side function when
+            their time passes; the admin gate is enforced by Row Level Security.
           </p>
         </div>
 

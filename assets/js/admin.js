@@ -351,6 +351,82 @@
     else if (page === "community") initCommunity();
   });
 
+  /* ---------- one-time local-data import ----------
+     Chapters and CMS entries created before the backend was
+     connected live only in this browser's localStorage. This
+     pushes them into the backend, merged by id (existing backend
+     entries are never overwritten). */
+
+  function initImport(renderAll) {
+    var panel = document.getElementById("import-panel");
+    if (!panel) return;
+    var info = document.getElementById("import-info");
+    var btn = document.getElementById("import-local");
+    var result = document.getElementById("import-result");
+
+    var counts = { chapters: 0, cmsItems: 0 };
+    try {
+      var ch = JSON.parse(localStorage.getItem("volmerra:chapters") || "null");
+      counts.chapters = ch && ch.chapters ? ch.chapters.length : 0;
+      var cms = JSON.parse(localStorage.getItem("volmerra:cms") || "null");
+      if (cms) {
+        ["characters", "locations", "lore", "gallery", "reports"].forEach(
+          function (name) {
+            counts.cmsItems += cms[name] ? cms[name].length : 0;
+          }
+        );
+      }
+    } catch (e) {}
+
+    if (!counts.chapters && !counts.cmsItems) {
+      info.textContent =
+        "No local data found in this browser — nothing to import.";
+      btn.disabled = true;
+      panel.hidden = false;
+      return;
+    }
+    info.textContent =
+      "This browser still holds " +
+      counts.chapters +
+      " chapter(s) and " +
+      counts.cmsItems +
+      " CMS item(s) from before the backend was connected. Importing " +
+      "adds them to the database; entries that already exist there are kept.";
+    btn.addEventListener("click", function () {
+      btn.disabled = true;
+      btn.textContent = "Importing…";
+      Promise.all([
+        window.VolmerraChapters.importLocalBackup(),
+        window.VolmerraCMS.importLocalBackup(),
+      ])
+        .then(function (results) {
+          result.hidden = false;
+          result.textContent =
+            "Done — " +
+            results[0].chapters +
+            " chapter(s) and " +
+            results[1].items +
+            " CMS item(s) were imported. The site now shows them on every device.";
+          window.VolmerraCMS.log(
+            "Imported local preview data (" +
+              results[0].chapters +
+              " chapters, " +
+              results[1].items +
+              " items)"
+          );
+          renderAll();
+        })
+        .catch(function (error) {
+          result.hidden = false;
+          result.textContent =
+            error && error.message ? error.message : "Import failed.";
+          btn.disabled = false;
+          btn.textContent = "Import this browser's data";
+        });
+    });
+    panel.hidden = false;
+  }
+
   /* ================= Dashboard ================= */
 
   function initDashboard() {
@@ -432,6 +508,7 @@
 
     guardAdmin(function () {
       renderAll();
+      initImport(renderAll);
       startTicker(renderAll);
     });
   }
