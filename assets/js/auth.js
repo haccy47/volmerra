@@ -497,14 +497,26 @@
     }
     /* The backend chain (config → 215 KB client library → adapter
        module → session restore) can take several seconds on a slow
-       mobile connection: show a connecting state first and only
-       declare the connection dead after a generous window. */
-    var elapsed = Date.now() - (window.VOLMERRA_BACKEND_STARTED_AT || Date.now());
-    if (elapsed < 15000) {
-      badge.textContent = "DB: bağlanıyor…";
+       mobile connection: show which stage is running and only
+       declare the connection dead after a generous window. If a
+       script fails to load or parse, the stage freezes — the badge
+       then tells us exactly where the chain stopped. */
+    var stageTexts = {
+      "adapter-script-loaded": "kütüphane iniyor…",
+      "library-ok": "adapter iniyor…",
+      "waiting-modules": "modüller bekleniyor…",
+      "attached": "bağlandı",
+    };
+    var stage =
+      window.VOLMERRA_ATTACH_STAGE || "kütüphane iniyor…";
+    var stageText = stageTexts[stage] || stage;
+    var elapsed =
+      Date.now() - (window.VOLMERRA_BACKEND_STARTED_AT || Date.now());
+    if (elapsed < 20000) {
+      badge.textContent = "DB: bağlanıyor… " + stageText;
       badge.style.background = "#b98a1f";
     } else {
-      badge.textContent = "DB: OFFLINE — sayfayı yenile";
+      badge.textContent = "DB: OFFLINE (" + stage + ")";
       badge.style.background = "#a03434";
     }
   }
@@ -515,4 +527,20 @@
     badgeTimer = window.setInterval(updateDbBadge, 1000);
   }
   document.addEventListener("volmerra:auth-ready", updateDbBadge);
+  /* Surface any uncaught script error (a browser that cannot parse
+     the client library bundle, a broken cached copy, …) directly on
+     the badge, so the failure point is visible without devtools. */
+  window.addEventListener("error", function (event) {
+    var errorBadge = document.getElementById("volmerra-db-badge");
+    if (!errorBadge) return;
+    var message =
+      (event && (event.message || (event.error && event.error.message))) ||
+      "unknown error";
+    errorBadge.textContent = "HATA: " + String(message).slice(0, 56);
+    errorBadge.style.background = "#7a1f1f";
+    if (badgeTimer) {
+      window.clearInterval(badgeTimer);
+      badgeTimer = null;
+    }
+  });
 })();

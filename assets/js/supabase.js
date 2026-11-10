@@ -34,6 +34,8 @@
 (function () {
   "use strict";
 
+  window.VOLMERRA_ATTACH_STAGE = "adapter-script-loaded";
+
   var config = window.VOLMERRA_BACKEND;
   if (!config || !window.supabase || !window.supabase.createClient) {
     console.warn(
@@ -41,6 +43,8 @@
     );
     return;
   }
+
+  window.VOLMERRA_ATTACH_STAGE = "library-ok";
 
   var client = window.supabase.createClient(config.url, config.anonKey, {
     auth: {
@@ -485,6 +489,7 @@
       !window.VolmerraComments ||
       !window.VolmerraLibrary;
     if (missing) {
+      window.VOLMERRA_ATTACH_STAGE = "waiting-modules";
       document.addEventListener("DOMContentLoaded", attachAdapters, {
         once: true,
       });
@@ -520,6 +525,7 @@
        unconditionally — a stale optional module degrades its own
        feature but must not disable accounts. */
     window.VOLMERRA_BACKEND_ACTIVE = true;
+    window.VOLMERRA_ATTACH_STAGE = "attached";
 
     /* ---------- session restore ---------- */
 
