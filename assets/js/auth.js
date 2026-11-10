@@ -69,6 +69,7 @@
           : null);
       if (cfg && cfg.url && cfg.anonKey) {
         window.VOLMERRA_BACKEND = cfg;
+        window.VOLMERRA_BACKEND_CONFIGURED = true;
         /* The Supabase client library is vendored locally
            (assets/js/vendor/supabase.js) so the site never depends
            on a third-party CDN — some networks block CDNs, and a
@@ -334,6 +335,22 @@
 
   var backend = localStorageBackend;
 
+  /* Guard: when the site is configured for the real backend, never
+     allow an account to be created or a session to be opened in the
+     localStorage fallback. That fallback exists only for preview
+     builds with no config.js — a signup landing there silently
+     per-browser is exactly the failure mode this gate prevents. */
+  function requireLiveBackend() {
+    if (
+      window.VOLMERRA_BACKEND_CONFIGURED &&
+      !window.VOLMERRA_BACKEND_ACTIVE
+    ) {
+      throw new Error(
+        "Veritabanı bağlantısı kurulamadı — sayfayı yenile ve tekrar dene. (Database connection unavailable — reload this page.)"
+      );
+    }
+  }
+
   window.VolmerraAuth = {
     /* Attaches a real backend (assets/js/supabase.js). The adapter
        implements the same interface as localStorageBackend. */
@@ -391,6 +408,11 @@
           new Error("Password must be at least 8 characters long.")
         );
       }
+      try {
+        requireLiveBackend();
+      } catch (error) {
+        return Promise.reject(error);
+      }
       return backend.register({
         displayName: displayName,
         email: email,
@@ -399,6 +421,11 @@
     },
 
     login: function (input) {
+      try {
+        requireLiveBackend();
+      } catch (error) {
+        return Promise.reject(error);
+      }
       return backend.login({
         email: (input.email || "").trim().toLowerCase(),
         password: input.password || "",
@@ -434,4 +461,39 @@
       return backend.listUsers();
     },
   };
+
+  /* ---------- DB status badge ----------
+     On a site configured for the real backend, a tiny badge in the
+     bottom-right corner shows whether the connection is actually
+     live. Absence of the badge = the page is running a stale cached
+     copy of the code or a wrong copy of the site. */
+  function updateDbBadge() {
+    if (!window.VOLMERRA_BACKEND_CONFIGURED) return;
+    var badge = document.getElementById("volmerra-db-badge");
+    if (!badge) {
+      if (!document.body) return;
+      badge = document.createElement("div");
+      badge.id = "volmerra-db-badge";
+      badge.style.cssText =
+        "position:fixed;bottom:6px;right:6px;z-index:2147483647;" +
+        "font:600 10px/1.4 -apple-system,Helvetica,Arial,sans-serif;" +
+        "padding:4px 8px;border-radius:999px;pointer-events:none;" +
+        "opacity:0.85;color:#fff;background:#555;";
+      document.body.appendChild(badge);
+    }
+    if (window.VOLMERRA_BACKEND_ACTIVE) {
+      badge.textContent = "DB: Supabase ✓";
+      badge.style.background = "#1d7a3a";
+    } else {
+      badge.textContent = "DB: OFFLINE — sayfayı yenile";
+      badge.style.background = "#a03434";
+    }
+  }
+  document.addEventListener("volmerra:backend-ready", function () {
+    document.addEventListener("volmerra:auth-ready", updateDbBadge);
+    updateDbBadge();
+    /* Final verdict: if the backend never attaches, the badge turns
+       red after a short wait instead of staying ambiguous. */
+    window.setTimeout(updateDbBadge, 4000);
+  });
 })();

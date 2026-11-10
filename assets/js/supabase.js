@@ -487,6 +487,8 @@
     window.VolmerraCMS.setAdapter(cmsAdapter);
     window.VolmerraComments.setAdapter(commentsAdapter);
     window.VolmerraLibrary.setAdapter(libraryAdapter);
+    /* Public diagnostic flag: the real backend is attached. */
+    window.VOLMERRA_BACKEND_ACTIVE = true;
 
     /* ---------- session restore ---------- */
 
