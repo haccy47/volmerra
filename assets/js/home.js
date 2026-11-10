@@ -398,6 +398,29 @@
     initHero();
   });
 
+  /* Live refresh for the real backend (Supabase adapter): when the
+     session is restored or the reader's library row arrives, re-run
+     the member/guest switch and re-render the library panels. The
+     localStorage flow never fires these events. */
+  function refreshHomeAuth() {
+    var guest = document.getElementById("home-guest");
+    var member = document.getElementById("home-member");
+    if (!guest || !member) return;
+    var user = window.VolmerraAuth.currentUser();
+    if (user) {
+      guest.hidden = true;
+      member.hidden = false;
+      renderMemberHome(user);
+    } else {
+      guest.hidden = false;
+      member.hidden = true;
+    }
+  }
+  document.addEventListener("volmerra:auth-ready", refreshHomeAuth);
+  document.addEventListener("volmerra:library-loaded", function () {
+    if (window.VolmerraAuth.currentUser()) renderMemberHome(window.VolmerraAuth.currentUser());
+  });
+
   /* ============================================================
      Cinematic countdown hero
      ------------------------------------------------------------

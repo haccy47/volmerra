@@ -1,12 +1,21 @@
 /* ============================================================
-   VOLMERRA — Personal library store (scaffold)
+   VOLMERRA — Personal library store
    ------------------------------------------------------------
    Stores reading progress, favorites, saved chapters and
-   reading history per user id in localStorage. Like auth.js,
-   this is a client-side scaffold: swap the persistence layer
-   for a backend when one is connected. Chapter records are
-   { id, title, percent } and reference chapters in the
-   chapter data layer (chapters.js).
+   reading history per user id. Two interchangeable persistence
+   paths behind the same synchronous API:
+
+   - localStorage (default, per browser, like the preview build)
+   - a backend adapter (assets/js/supabase.js stores one row per
+     user in the `library` table). The in-memory cache keeps the
+     existing synchronous call sites working: every mutation
+     updates the cache immediately and is pushed to the backend
+     in the background. When the backend loads a user's row it
+     installs it with _install() and fires "volmerra:library-
+     loaded" so open pages can re-render.
+
+   Chapter records are { id, title, percent } and reference
+   chapters in the chapter data layer (chapters.js).
 
    prune(userId, validById) removes library references that no
    longer point at an existing, published, publicly accessible
@@ -32,7 +41,22 @@
     return "volmerra:library:" + userId;
   }
 
+  /* Optional backend adapter: { save(userId, library) -> Promise }. */
+  var adapter = null;
+
+  /* In-memory cache: user id -> library. Keeps the synchronous
+     API intact while the real backend loads/saves in the
+     background. */
+  var cache = {};
+
   function read(userId) {
+    if (cache[userId]) {
+      return cache[userId];
+    }
+    if (adapter) {
+      /* Backend active but the row has not arrived yet. */
+      return defaults();
+    }
     try {
       var data = JSON.parse(localStorage.getItem(keyFor(userId)));
       return Object.assign(defaults(), data || {});
@@ -42,7 +66,21 @@
   }
 
   function write(userId, library) {
-    localStorage.setItem(keyFor(userId), JSON.stringify(library));
+    cache[userId] = library;
+    if (adapter) {
+      adapter.save(userId, library).catch(function (error) {
+        console.warn(
+          "Volmerra library could not be saved:",
+          error && error.message
+        );
+      });
+      return;
+    }
+    try {
+      localStorage.setItem(keyFor(userId), JSON.stringify(library));
+    } catch (e) {
+      /* storage unavailable — the library still applies for this visit */
+    }
   }
 
   function upsert(list, chapter) {
@@ -55,6 +93,23 @@
 
   window.VolmerraLibrary = {
     get: read,
+
+    setAdapter: function (replacement) {
+      adapter = replacement;
+    },
+
+    /* Internal hooks used by the backend adapter (assets/js/
+       supabase.js). _install() puts the fetched row into the cache
+       and lets open pages re-render; _forget() clears a signed-out
+       user's cache. */
+    _install: function (userId, library) {
+      cache[userId] = Object.assign(defaults(), library || {});
+      document.dispatchEvent(new CustomEvent("volmerra:library-loaded"));
+    },
+
+    _forget: function (userId) {
+      delete cache[userId];
+    },
 
     /* Keeps only entries whose id exists in validById. Any truthy
        value counts as valid (home.js passes { id: chapterObject }),

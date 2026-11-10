@@ -558,9 +558,22 @@
   document.addEventListener("click", function (event) {
     var btn = event.target.closest(".sign-out");
     if (btn) {
-      window.VolmerraAuth.logout();
-      window.location.href = ROOT + "index.html";
+      /* logout() returns a Promise on the real backend (Supabase):
+         wait for the session to end before redirecting. */
+      Promise.resolve(window.VolmerraAuth.logout()).then(function () {
+        window.location.href = ROOT + "index.html";
+      });
     }
+  });
+
+  /* When the real backend restores the session (Supabase adapter),
+     re-render the header and the mobile bottom navigation so the
+     signed-in state appears without a manual reload. The
+     localStorage flow never fires this event. */
+  document.addEventListener("volmerra:auth-ready", function () {
+    renderHeader();
+    var wrap = document.querySelector(".mobile-bottom-nav-wrap");
+    if (wrap) wrap.innerHTML = bottomNavHtml();
   });
 
   /* Re-render the footer when season statuses change so the public

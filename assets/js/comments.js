@@ -65,6 +65,11 @@
   }
 
   function readComments() {
+    /* Backend adapter: fetches the flat comment list (with likes)
+       straight from the rows; RLS decides what is readable. */
+    if (adapter.fetchAll) {
+      return adapter.fetchAll();
+    }
     return adapter.read().then(function (data) {
       if (Array.isArray(data)) return data;
       if (data && Array.isArray(data.comments)) return data.comments;
@@ -165,6 +170,11 @@
             edited: false,
             likedBy: [],
           };
+          /* Backend adapter: insert as a row — the RLS INSERT policy
+             requires the row's user_id to match the signed-in user. */
+          if (adapter.insert) {
+            return adapter.insert(comment);
+          }
           all.push(comment);
           return adapter.write(all).then(function () {
             return comment;
@@ -185,6 +195,11 @@
             throw new Error("You can only edit your own comments.");
           }
           var value = validateText(text);
+          /* Backend adapter: the UPDATE is scoped to (id, user_id) and
+             RLS enforces ownership server-side. */
+          if (adapter.updateRow) {
+            return adapter.updateRow(id, userId, value);
+          }
           comment.text = value;
           comment.edited = true;
           comment.updatedAt = new Date().toISOString();
@@ -207,6 +222,11 @@
           if (comment.userId !== userId) {
             throw new Error("You can only delete your own comments.");
           }
+          /* Backend adapter: the DELETE is scoped to (id, user_id);
+             replies cascade server-side (ON DELETE CASCADE). */
+          if (adapter.deleteRow) {
+            return adapter.deleteRow(id, userId);
+          }
           var keep = all.filter(function (c) {
             return c.id !== id && c.parentId !== id;
           });
@@ -222,6 +242,11 @@
         return Promise.reject(new Error("Sign in to like comments."));
       }
       return enqueue(function () {
+        /* Backend adapter: like rows live in comment_likes; RLS only
+           allows touching rows whose user_id matches the caller. */
+        if (adapter.toggleLike) {
+          return adapter.toggleLike(id, userId);
+        }
         return readComments().then(function (all) {
           var comment = all.find(function (c) {
             return c.id === id;

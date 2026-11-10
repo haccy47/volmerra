@@ -1,16 +1,90 @@
 /* ============================================================
-   VOLMERRA — Authentication scaffold
+   VOLMERRA — Authentication
    ------------------------------------------------------------
-   NOTE: This is a client-side scaffold built so the interface
-   can be designed and demonstrated without a server. Accounts
-   and sessions live in localStorage and are NOT secure.
-   Replace this module with a real backend (accounts, sessions,
-   password hashing on the server) before launch.
-   No demo accounts exist: every account is created by the user.
+   Two interchangeable backends behind one API:
+
+   1. localStorage backend (default): honest client-side
+      scaffold so the interface works without a server.
+      Accounts and sessions live in localStorage and are NOT
+      secure — kept only as a fallback for preview builds
+      with no config.js.
+
+   2. Supabase backend (assets/js/supabase.js): real accounts
+      (Supabase Auth), profiles in the `profiles` table, the
+      admin role enforced by Row Level Security. Attached
+      automatically when `config.js` defines the project
+      credentials.
+
+   The public API is unchanged for every caller:
+     currentUser()   sync, backed by an in-memory session cache
+     register/login/logout/updateProfile  Promises
+     isAdmin()       sync (cached profile role)
+     adminExists()   -> Promise<boolean>
+     setAdmin(flag)  -> Promise<user>
+     listUsers()     -> Promise<array>
+     whenReady(cb)   resolves once the active backend has
+                     restored its session (immediate for the
+                     localStorage backend)
    ============================================================ */
 
 (function () {
   "use strict";
+
+  /* ---------- Backend bootstrap ----------
+     Tries to load config.js next to this file. If it defines
+     window.VOLMERRA_BACKEND, the Supabase client library and the
+     adapter module are loaded and every data layer swaps to the
+     real backend. A missing config.js silently keeps the site on
+     the localStorage adapters below. */
+  var SELF_SRC = document.currentScript
+    ? document.currentScript.src
+    : null;
+
+  var bootstrapped = new Promise(function (resolve) {
+    function done() {
+      document.dispatchEvent(new CustomEvent("volmerra:backend-ready"));
+      resolve();
+    }
+    if (!SELF_SRC) {
+      done();
+      return;
+    }
+    var dir = SELF_SRC.replace(/[^/]*$/, "");
+    var config = document.createElement("script");
+    config.src = dir + "config.js";
+    config.onload = function () {
+      /* Two accepted shapes:
+         window.VOLMERRA_BACKEND = { url, anonKey }  (canonical)
+         window.VOLMERRA_CONFIG  = { supabaseUrl, supabaseAnonKey } */
+      var cfg =
+        window.VOLMERRA_BACKEND ||
+        (window.VOLMERRA_CONFIG
+          ? {
+              url: window.VOLMERRA_CONFIG.supabaseUrl,
+              anonKey: window.VOLMERRA_CONFIG.supabaseAnonKey,
+            }
+          : null);
+      if (cfg && cfg.url && cfg.anonKey) {
+        window.VOLMERRA_BACKEND = cfg;
+        var cdn = document.createElement("script");
+        cdn.src =
+          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js";
+        cdn.onload = function () {
+          var backend = document.createElement("script");
+          backend.src = dir + "supabase.js";
+          backend.onload = done;
+          backend.onerror = done;
+          document.head.appendChild(backend);
+        };
+        cdn.onerror = done;
+        document.head.appendChild(cdn);
+      } else {
+        done();
+      }
+    };
+    config.onerror = done;
+    document.head.appendChild(config);
+  });
 
   var USERS_KEY = "volmerra:users";
   var SESSION_KEY = "volmerra:session";
@@ -87,10 +161,15 @@
     };
   }
 
-  window.VolmerraAuth = {
+  /* ---------- localStorage backend (preview fallback) ---------- */
+
+  var localStorageBackend = {
+    isReady: function () {
+      return true;
+    },
+
     currentUser: function () {
-      var session = readSession();
-      return session || null;
+      return readSession() || null;
     },
 
     register: function (input) {
@@ -161,6 +240,7 @@
 
     logout: function () {
       writeSession(null);
+      return Promise.resolve();
     },
 
     updateProfile: function (patch) {
@@ -190,23 +270,18 @@
       return Promise.resolve(fresh);
     },
 
-    /* ---------- Administrator permissions ----------
-       Preview build: roles live in the client-side account store
-       and the admin gate is enforced in the UI only. In production,
-       admin roles must be granted and every admin operation must
-       be authorized server-side. adminExists() enables a one-time
-       first-run ownership claim; once any account is an admin,
-       that offer disappears. */
-
     isAdmin: function () {
       var session = readSession();
       return !!(session && session.isAdmin);
     },
 
+    /* Promisified so both backends share one call shape. */
     adminExists: function () {
-      return readUsers().some(function (u) {
-        return u.isAdmin;
-      });
+      return Promise.resolve(
+        readUsers().some(function (u) {
+          return u.isAdmin;
+        })
+      );
     },
 
     setAdmin: function (flag) {
@@ -229,18 +304,122 @@
     },
 
     /* Read-only account directory for the admin panel. Never
-       exposes password hashes. Real user administration (roles,
-       deletion) must happen server-side in the backend. */
+       exposes password hashes. */
     listUsers: function () {
-      return readUsers().map(function (u) {
-        return {
-          id: u.id,
-          displayName: u.displayName,
-          email: u.email,
-          isAdmin: !!u.isAdmin,
-          createdAt: u.createdAt,
-        };
+      return Promise.resolve(
+        readUsers().map(function (u) {
+          return {
+            id: u.id,
+            displayName: u.displayName,
+            email: u.email,
+            isAdmin: !!u.isAdmin,
+            createdAt: u.createdAt,
+          };
+        })
+      );
+    },
+  };
+
+  var backend = localStorageBackend;
+
+  window.VolmerraAuth = {
+    /* Attaches a real backend (assets/js/supabase.js). The adapter
+       implements the same interface as localStorageBackend. */
+    setAdapter: function (replacement) {
+      if (!replacement) return;
+      backend = replacement;
+      if (typeof replacement.boot === "function") {
+        replacement.boot(window.VolmerraAuth);
+      }
+    },
+
+    /* Resolves once the active backend restored its session (or
+       immediately for the localStorage backend). The backend is
+       only evaluated after the bootstrap chain finished, so a
+       Supabase adapter that is still loading is never mistaken for
+       the localStorage fallback; a timeout keeps pages usable even
+       if the backend never becomes reachable. */
+    whenReady: function (callback) {
+      var restored = bootstrapped.then(function () {
+        return new Promise(function (resolve) {
+          if (backend.isReady && backend.isReady()) {
+            resolve();
+            return;
+          }
+          document.addEventListener("volmerra:auth-ready", resolve, {
+            once: true,
+          });
+        });
       });
+      var timeout = new Promise(function (resolve) {
+        window.setTimeout(resolve, 8000);
+      });
+      return Promise.race([restored, timeout]).then(callback);
+    },
+
+    /* ---------- public API (delegates to the active backend) ---------- */
+
+    currentUser: function () {
+      return backend.currentUser();
+    },
+
+    register: function (input) {
+      var displayName = (input.displayName || "").trim();
+      var email = (input.email || "").trim().toLowerCase();
+      var password = input.password || "";
+
+      if (!displayName) {
+        return Promise.reject(new Error("Please enter a display name."));
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return Promise.reject(new Error("Please enter a valid email address."));
+      }
+      if (password.length < 8) {
+        return Promise.reject(
+          new Error("Password must be at least 8 characters long.")
+        );
+      }
+      return backend.register({
+        displayName: displayName,
+        email: email,
+        password: password,
+      });
+    },
+
+    login: function (input) {
+      return backend.login({
+        email: (input.email || "").trim().toLowerCase(),
+        password: input.password || "",
+      });
+    },
+
+    logout: function () {
+      return backend.logout();
+    },
+
+    updateProfile: function (patch) {
+      return backend.updateProfile(patch || {});
+    },
+
+    /* Administrator permissions: with the Supabase backend the role
+       lives in the `profiles` table and every admin write is enforced
+       by Row Level Security — the client cannot grant itself access.
+       adminExists() enables the one-time first-run ownership claim;
+       once any account is an admin, that offer disappears. */
+    isAdmin: function () {
+      return backend.isAdmin();
+    },
+
+    adminExists: function () {
+      return backend.adminExists();
+    },
+
+    setAdmin: function (flag) {
+      return backend.setAdmin(!!flag);
+    },
+
+    listUsers: function () {
+      return backend.listUsers();
     },
   };
 })();

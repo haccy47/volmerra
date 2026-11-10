@@ -224,7 +224,9 @@
       });
     },
 
-    /* Activity log: what was changed in the admin panel, newest first. */
+    /* Activity log: what was changed in the admin panel, newest first.
+       Best-effort: on backends where only administrators may write,
+       a public visitor's logging attempt must fail silently. */
     log: function (text) {
       return enqueue(function () {
         return readState().then(function (state) {
@@ -236,6 +238,8 @@
           state.activity = state.activity.slice(0, 50);
           return adapter.write(state);
         });
+      }).catch(function () {
+        /* Intentionally swallowed — see the note above. */
       });
     },
 

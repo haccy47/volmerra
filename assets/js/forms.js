@@ -93,6 +93,10 @@
   /* Sign out button on the profile page (also handled globally in ui.js). */
 
   document.addEventListener("DOMContentLoaded", function () {
+    /* whenReady: on the real backend the session is restored
+       asynchronously — the account guards below must not redirect
+       to the login page before the profile has arrived. */
+    window.VolmerraAuth.whenReady(function () {
     var user = window.VolmerraAuth.currentUser();
 
     /* Your Account page: guard + bio + reading statistics */
@@ -108,35 +112,41 @@
       var bioField = document.getElementById("account-bio");
       if (bioField) bioField.value = user.bio || "";
 
-      window.VolmerraChapters.published().then(function (published) {
-        var lib = window.VolmerraLibrary.get(user.id);
-        var valid = {};
-        published.forEach(function (c) {
-          valid[c.id] = c;
+      function renderAccountStats() {
+        window.VolmerraChapters.published().then(function (published) {
+          var lib = window.VolmerraLibrary.get(user.id);
+          var valid = {};
+          published.forEach(function (c) {
+            valid[c.id] = c;
+          });
+          var stats = {
+            "stat-chapters-read": 0,
+            "stat-completed": 0,
+            "stat-favorites": 0,
+            "stat-saved": 0,
+          };
+          lib.history.forEach(function (h) {
+            if (valid[h.id]) {
+              stats["stat-chapters-read"]++;
+              if (h.completed) stats["stat-completed"]++;
+            }
+          });
+          lib.favorites.forEach(function (f) {
+            if (valid[f.id]) stats["stat-favorites"]++;
+          });
+          lib.saved.forEach(function (s) {
+            if (valid[s.id]) stats["stat-saved"]++;
+          });
+          Object.keys(stats).forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = stats[id];
+          });
         });
-        var stats = {
-          "stat-chapters-read": 0,
-          "stat-completed": 0,
-          "stat-favorites": 0,
-          "stat-saved": 0,
-        };
-        lib.history.forEach(function (h) {
-          if (valid[h.id]) {
-            stats["stat-chapters-read"]++;
-            if (h.completed) stats["stat-completed"]++;
-          }
-        });
-        lib.favorites.forEach(function (f) {
-          if (valid[f.id]) stats["stat-favorites"]++;
-        });
-        lib.saved.forEach(function (s) {
-          if (valid[s.id]) stats["stat-saved"]++;
-        });
-        Object.keys(stats).forEach(function (id) {
-          var el = document.getElementById(id);
-          if (el) el.textContent = stats[id];
-        });
-      });
+      }
+      renderAccountStats();
+      /* On the real backend the library row arrives asynchronously —
+         re-render the statistics when it lands. */
+      document.addEventListener("volmerra:library-loaded", renderAccountStats);
       return;
     }
 
@@ -220,5 +230,6 @@
         } catch (e) {}
       });
     }
+    });
   });
 })();

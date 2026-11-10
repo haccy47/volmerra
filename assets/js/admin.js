@@ -185,16 +185,24 @@
         onAdmin();
         return;
       }
-      if (!window.VolmerraAuth.adminExists()) {
-        claim.hidden = false;
-        return;
-      }
-      deniedText.textContent =
-        "This account does not have administrator permissions.";
-      denied.hidden = false;
+      window.VolmerraAuth.adminExists().then(function (exists) {
+        if (exists) {
+          deniedText.textContent =
+            "This account does not have administrator permissions.";
+          denied.hidden = false;
+        } else {
+          claim.hidden = false;
+        }
+      });
     }
 
     run();
+    /* On the real backend the session (and the cached admin role)
+       is restored asynchronously — re-run the guard when it lands.
+       The localStorage flow never fires this event. */
+    document.addEventListener("volmerra:auth-ready", function () {
+      run();
+    });
   }
 
   /* ---------- shared chapter helpers ---------- */
@@ -368,8 +376,9 @@
           }).length;
         document.getElementById("stat-characters").textContent =
           characters.length;
-        document.getElementById("stat-users").textContent =
-          window.VolmerraAuth.listUsers().length;
+        window.VolmerraAuth.listUsers().then(function (users) {
+          document.getElementById("stat-users").textContent = users.length;
+        });
 
         var scheduledMount = document.getElementById("scheduled-list");
         scheduledMount.innerHTML = "";
@@ -2155,29 +2164,30 @@
   function initCommunity() {
     guardAdmin(function () {
       var usersMount = document.getElementById("users-list");
-      var users = window.VolmerraAuth.listUsers();
-      usersMount.innerHTML = "";
-      if (!users.length) {
-        usersMount.appendChild(
-          el("div", "empty-state", "No registered users yet.")
-        );
-      }
-      users.forEach(function (u) {
-        var row = el("div", "admin-row");
-        var body = el("div", "admin-row-body");
-        body.appendChild(el("p", "admin-row-title", u.displayName));
-        body.appendChild(
-          el(
-            "p",
-            "admin-row-meta",
-            u.email + " · Joined " + formatDate(u.createdAt)
-          )
-        );
-        row.appendChild(body);
-        if (u.isAdmin) {
-          row.appendChild(el("span", "badge badge--published", "Admin"));
+      window.VolmerraAuth.listUsers().then(function (users) {
+        usersMount.innerHTML = "";
+        if (!users.length) {
+          usersMount.appendChild(
+            el("div", "empty-state", "No registered users yet.")
+          );
         }
-        usersMount.appendChild(row);
+        users.forEach(function (u) {
+          var row = el("div", "admin-row");
+          var body = el("div", "admin-row-body");
+          body.appendChild(el("p", "admin-row-title", u.displayName));
+          body.appendChild(
+            el(
+              "p",
+              "admin-row-meta",
+              u.email + " · Joined " + formatDate(u.createdAt)
+            )
+          );
+          row.appendChild(body);
+          if (u.isAdmin) {
+            row.appendChild(el("span", "badge badge--published", "Admin"));
+          }
+          usersMount.appendChild(row);
+        });
       });
 
       renderModeration(

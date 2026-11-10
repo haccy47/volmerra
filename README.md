@@ -51,8 +51,13 @@ assets/js/
   theme.js          Light/dark switching, persisted, system preference fallback
   season.js         Seasonal accent system: applies data-season (S1–S8) on the current page
   seasons.js        Season release & visibility: publication status (S1–S8), central visibility rule
-  auth.js           Registration, login/logout, profile updates, admin role (client-side scaffold)
+  auth.js           Registration, login/logout, profile updates, admin role
+                    (localStorage fallback + swappable Supabase backend)
+  supabase.js       Real backend adapter: Supabase Auth, profiles, chapters,
+                    CMS, comments, library (attached when config.js exists)
+  config.example.js Template for assets/js/config.js (Supabase URL + anon key)
   store.js          Personal library per user: progress, favorites, saved, history
+  comments.js       Chapter comments data layer: replies, likes, ownership rules
   chapters.js       Chapter data layer + SXBX numbering, swappable storage adapter
   cms.js            CMS data layer: characters, locations, lore, gallery, settings, activity log
   admin.js          Admin controller: dashboard, all management sections, shared shell and guard
@@ -98,16 +103,66 @@ never changes. A compact season picker sits in the footer.
 
 ## Accounts, sessions and the library
 
-`auth.js` and `store.js` are an honest **client-side scaffold** so the interface
-can be designed without a server:
+`auth.js` and `store.js` run on two interchangeable backends behind one
+API:
 
-- Accounts and sessions live in `localStorage` and are **not secure**; passwords
-  are hashed in the browser only. Replace both modules with a real backend
-  (server-side accounts, sessions, password hashing) before launch.
+- **Supabase backend (default when configured)** — real accounts via
+  Supabase Auth, profiles in the `profiles` table, the admin role
+  (`profiles.is_admin`) enforced by Row Level Security, the library
+  stored per user in the `library` table. See "Supabase backend" below.
+- **localStorage backend (fallback)** — honest client-side scaffold so
+  the interface still works without a server: accounts and sessions live
+  in `localStorage`, are **not secure**, and passwords are hashed in the
+  browser only. Used when `assets/js/config.js` does not exist.
 - There are **no demo accounts** — every profile is created by a real
-  registration, and the member homepage only appears for a genuine session.
-- Library data is stored per user id (`volmerra:library:<id>`): continue
-  reading, reading history, favorites and saved chapters.
+  registration, and the member homepage only appears for a genuine
+  session.
+- Library data (continue reading, reading history, favorites, saved
+  chapters) is stored per user id — in the backend row, or in
+  `volmerra:library:<id>` on the fallback.
+
+## Supabase backend
+
+The site keeps its swappable adapter architecture: `assets/js/
+supabase.js` attaches real backends to `VolmerraAuth`, `VolmerraCh
+apters`, `VolmerraCMS`, `VolmerraComments` and `VolmerraLibrary`
+without touching any UI code. `auth.js` loads `config.js` → the
+Supabase client library (CDN) → `supabase.js` automatically on every
+page; without `config.js` the localStorage adapters stay active.
+
+Setup:
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. Open **SQL Editor** and run `supabase/schema.sql` (tables, Row Level
+   Security policies, RPCs, the profile-on-signup trigger).
+3. **Authentication → Providers → Email**: disable "Confirm email" for
+   instant sign-in during development (otherwise registration requires
+   email confirmation before the first login).
+4. Copy **Project Settings → API → Project URL** and the **anon public**
+   key into `assets/js/config.js` (template: `config.example.js`). The
+   anon key is public by design and ships with the site; the
+   service_role key must never be committed. `.env.example` mirrors
+   the same values for tooling.
+5. The first registered account can claim administrator access once
+   from any admin page (`admin/index.html` → "Claim administrator
+   access"). The claim closes itself after the first admin exists;
+   roles are then granted/revoked from the Supabase dashboard
+   (`profiles.is_admin`).
+
+Security model (enforced by RLS in `supabase/schema.sql`, not by the
+client):
+
+- Guests read published/scheduled chapters, CMS content and all
+  comments; every write requires a signed-in account.
+- Comment edit/delete is restricted to the author by RLS policies; one
+  like per user per comment; replies cascade with their parent.
+- Only administrators can write chapters/CMS data (`site_state`); public
+  reads go through the `read_state()` RPC, which hides drafts and
+  internal moderation data.
+- Scheduled publication runs server-side via `publish_due_chapters()`
+  (SECURITY DEFINER), so a visitor's browser can trigger it without
+  any write access.
+- The user library is a per-user row only the owner can read or write.
 
 ## Chapters, admin panel and the data layer
 
@@ -116,18 +171,16 @@ async and routed through a **swappable storage adapter** (`setAdapter`); the
 default adapter persists to the browser, so the admin panel and the public
 pages are fully usable today.
 
-**Honest limits of this preview build** — there is no backend yet:
+**Limits of the localStorage fallback (no config.js):**
 
 - Chapters and covers are stored client-side, per browser. They are not a
   database: content will not sync between devices or survive a cleared
-  browser store. Moving `chapters.js`'s adapter to a backend API adapter is
-  the one change needed for real persistence.
-- The admin gate (`VolmerraAuth.isAdmin`) is enforced in the client only.
-  The first signed-in account can claim administrator ownership once
-  (`admin/index.html` first-run setup); after that, non-admin accounts are
-  denied. In production, admin roles must be granted and every admin
-  operation must be authorized **server-side** — the storage adapter is the
-  single place to enforce it.
+  browser store. Adding `assets/js/config.js` (Supabase backend) is the
+  one change needed for real persistence.
+- On the fallback the admin gate (`VolmerraAuth.isAdmin`) is enforced in
+  the client only; on the Supabase backend the role lives in
+  `profiles.is_admin` and every admin write is authorized server-side by
+  Row Level Security (see "Supabase backend" above).
 
 ### Automatic chapter numbering (SXBX)
 
@@ -360,8 +413,9 @@ no-id fallback visits, which resolve to the latest published chapter.
 
 ## Next stages
 
-1. Replace the storage adapter with a backend API: real database persistence
-   and server-side admin authorization.
-2. Comments on stories and chapters (replies, likes, edit/delete own,
-   timestamps). Guests read, signed-in readers write — needs the backend.
-3. Notifications on new chapter releases.
+1. Move chapter covers and CMS images from base64-in-JSONB to Supabase
+   Storage buckets (larger images, cacheable URLs).
+2. Real-time comment updates (Supabase Realtime) and comment moderation
+   actions for administrators.
+3. Notifications on new chapter releases delivered to offline users
+   (server-side scheduling + email/push).

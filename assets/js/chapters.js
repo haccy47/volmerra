@@ -209,12 +209,18 @@
       });
     },
 
-    /* Prototype auto-publish: flips scheduled chapters whose time has
-       passed to published. This runs while the website is open in a
-       browser. Reliable publication at the scheduled time even when
-       nobody has the site open requires a server-side scheduler in the
-       future backend — a countdown alone does not publish a chapter. */
+    /* Auto-publish: flips scheduled chapters whose time has passed
+       to published. On the Supabase backend this is a server-side
+       RPC (publish_due_chapters); on the localStorage fallback it
+       runs in the browser while the website is open — reliable
+       publication without a visitor still needs a hosted scheduler. */
     publishDue: function () {
+      /* Backend adapter path: publication is a server-side operation
+         (a SECURITY DEFINER RPC), so a visitor's browser can trigger
+         it without any write access and RLS stays intact. */
+      if (adapter.publishDue) {
+        return adapter.publishDue();
+      }
       return enqueue(function () {
         return readState().then(function (state) {
           var now = Date.now();
