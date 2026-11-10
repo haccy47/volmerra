@@ -105,6 +105,32 @@
             </p>
           </div>
 
+          <div class="member-panel" id="push-admin-panel" style="margin-bottom: var(--space-5);">
+            <div class="member-panel-head">
+              <h2>Telefon bildirimleri (Web Push)</h2>
+            </div>
+            <p class="content-note">
+              Yeni bölüm yayınlanınca okuyucuların telefonuna bildirim gider
+              (iOS 16.4+ ve okuyucunun siteyi Ana Ekrana eklemiş olması gerekir).
+            </p>
+            <div class="avatar-row">
+              <button class="btn btn--primary" type="button" id="push-generate">VAPID anahtarı üret</button>
+              <button class="btn btn--ghost btn--sm" type="button" id="push-save" hidden>Anahtarları kaydet</button>
+            </div>
+            <p class="content-note" id="push-admin-status"></p>
+            <div id="push-edge-block" hidden>
+              <p class="content-note">
+                Şimdi Edge Function'ı kur: Supabase → Edge Functions → Create a
+                new function → adı <code>notify-new-chapter</code> olsun →
+                aşağıdaki kodu yapıştır → Deploy.
+              </p>
+              <pre id="push-edge-code" style="white-space: pre-wrap; font: 11px/1.5 ui-monospace, monospace; max-height: 300px; overflow: auto; background: var(--bg-soft, #f5f5f5); padding: 12px; border-radius: 8px;"></pre>
+              <div class="avatar-row">
+                <button class="btn btn--ghost btn--sm" type="button" id="push-copy">Edge Function kodunu kopyala</button>
+              </div>
+            </div>
+          </div>
+
           <div class="member-panel">
             <div class="member-panel-head">
               <h2>Seasonal settings</h2>

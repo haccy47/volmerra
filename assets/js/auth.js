@@ -543,4 +543,29 @@
       badgeTimer = null;
     }
   });
+
+  /* ---------- PWA + Telefon bildirimleri ----------
+     Service worker (telefon bildirimlerini karşılayan) kaydedilir
+     ve iOS için web app manifest'i sayfaya eklenir — telefon
+     bildirimleri siteyi Ana Ekrana eklenmiş olmayı şart koşar. */
+  if ("serviceWorker" in navigator && SELF_SRC) {
+    var siteRoot = SELF_SRC.replace(/assets\/js\/auth\.js(\?.*)?$/, "");
+    if (siteRoot) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker
+          .register(siteRoot + "sw.js?v=2")
+          .catch(function (error) {
+            console.warn("SW kaydı başarısız:", error);
+          });
+      });
+    }
+    try {
+      var manifestLink = document.createElement("link");
+      manifestLink.rel = "manifest";
+      manifestLink.href = siteRoot + "manifest.json?v=2";
+      document.head.appendChild(manifestLink);
+    } catch (e) {
+      /* manifest enjekte edilemezse bildirim özelliği pas geçilir */
+    }
+  }
 })();

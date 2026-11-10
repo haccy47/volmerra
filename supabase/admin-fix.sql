@@ -52,3 +52,56 @@ $$;
 
 -- Kendi hesabını admin yap (emaili kendi hesabınla değiştir):
 update public.profiles set is_admin = true where email = 'imhaccy@gmail.com';
+
+
+-- ============================================================
+-- 2) TELEFON BİLDİRİMLERİ (Web Push) — tablolar
+-- ============================================================
+-- Yeni bölüm yayınlanınca kayıtlı telefonlara bildirim gider.
+-- (schema.sql'de de var; tek yapıştırma ile her şey kurulsun diye
+--  buraya da eklendi — idempotent, tekrar çalıştırmak zararsız.)
+
+create table if not exists public.push_subscriptions (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  endpoint   text not null unique,
+  p256dh     text not null,
+  auth       text not null,
+  user_agent text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.push_subscriptions enable row level security;
+
+create policy "push_subscriptions: owner reads own"
+  on public.push_subscriptions for select
+  using (auth.uid() = user_id);
+
+create policy "push_subscriptions: owner inserts own"
+  on public.push_subscriptions for insert
+  with check (auth.uid() = user_id);
+
+create policy "push_subscriptions: owner deletes own"
+  on public.push_subscriptions for delete
+  using (auth.uid() = user_id);
+
+create table if not exists public.push_config (
+  id         int primary key default 1,
+  public_key text not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.push_config enable row level security;
+
+create policy "push_config: herkes okur"
+  on public.push_config for select
+  using (true);
+
+create policy "push_config: admin yazar (insert)"
+  on public.push_config for insert
+  with check (public.is_admin());
+
+create policy "push_config: admin yazar (update)"
+  on public.push_config for update
+  using (public.is_admin())
+  with check (public.is_admin());

@@ -54,6 +54,9 @@
     },
   });
 
+  /* Gerekli yerlerde (ör. push aboneliği) doğrudan erişim için */
+  window.VOLMERRA_SUPABASE = client;
+
   var state = { user: null, ready: false };
 
   function now() {

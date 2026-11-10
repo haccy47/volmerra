@@ -969,6 +969,42 @@
                   href: "pages/chapter.html?id=" + chapter.id,
                 });
               }
+              /* Telefonlara push bildirimi (Supabase Edge Function;
+                 kurulmamışsa sessizce atlanır — kurulum: Admin →
+                 Website → Telefon bildirimleri paneli). */
+              if (window.VolmerraSupabase && window.VolmerraSupabase.functions) {
+                window.VolmerraSupabase.auth
+                  .getSession()
+                  .then(function (sessionResult) {
+                    var token =
+                      sessionResult &&
+                      sessionResult.data &&
+                      sessionResult.data.session
+                        ? sessionResult.data.session.access_token
+                        : "";
+                    return fetch(
+                      window.VolmerraSupabase.supabaseUrl +
+                        "/functions/v1/notify-new-chapter",
+                      {
+                        method: "POST",
+                        keepalive: true,
+                        headers: {
+                          "Content-Type": "application/json",
+                          apikey: window.VolmerraSupabase.supabaseKey,
+                          Authorization: "Bearer " + token,
+                        },
+                        body: JSON.stringify({
+                          chapter: {
+                            number: chapter.number,
+                            title: chapter.title,
+                            id: chapter.id,
+                          },
+                        }),
+                      }
+                    ).catch(function () {});
+                  })
+                  .catch(function () {});
+              }
             }
           }
           window.location.href =
@@ -1673,6 +1709,7 @@
     });
 
     guardAdmin(function () {
+      initPushAdmin();
       Promise.all([
         window.VolmerraChapters.list(),
         window.VolmerraCMS.list("characters", { all: true }),
@@ -1826,6 +1863,133 @@
           );
         });
     });
+  }
+
+  /* ================= Telefon bildirimleri (Web Push) ================= */
+
+  function initPushAdmin() {
+    var generateBtn = document.getElementById("push-generate");
+    if (!generateBtn) return;
+    var saveBtn = document.getElementById("push-save");
+    var statusEl = document.getElementById("push-admin-status");
+    var edgeBlock = document.getElementById("push-edge-block");
+    var edgeCodeEl = document.getElementById("push-edge-code");
+    var copyBtn = document.getElementById("push-copy");
+    var sup = window.VolmerraSupabase;
+    if (!sup) {
+      statusEl.textContent =
+        "Veritabanı bağlantısı yok (config.js) — push kurulamaz.";
+      generateBtn.disabled = true;
+      return;
+    }
+
+    function b64url(buffer) {
+      var bytes = new Uint8Array(buffer);
+      var bin = "";
+      for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+
+    var pendingPublicKey = null;
+    var pendingPrivateKey = null;
+
+    generateBtn.addEventListener("click", function () {
+      generateBtn.disabled = true;
+      crypto.subtle
+        .generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, [
+          "sign",
+          "verify",
+        ])
+        .then(function (pair) {
+          return Promise.all([
+            crypto.subtle.exportKey("raw", pair.publicKey),
+            crypto.subtle.exportKey("jwk", pair.privateKey),
+          ]);
+        })
+        .then(function (exported) {
+          pendingPublicKey = b64url(exported[0]);
+          pendingPrivateKey = exported[1].d; /* base64url private scalar */
+          saveBtn.hidden = false;
+          statusEl.textContent =
+            "Anahtarlar üretildi. Kaydet'e bas, sonra Edge Function kodunu kopyala.";
+          generateBtn.disabled = false;
+        })
+        .catch(function (error) {
+          statusEl.textContent =
+            "Anahtar üretilemedi: " + ((error && error.message) || "?");
+          generateBtn.disabled = false;
+        });
+    });
+
+    saveBtn.addEventListener("click", function () {
+      saveBtn.disabled = true;
+      sup
+        .from("push_config")
+        .upsert({
+          id: 1,
+          public_key: pendingPublicKey,
+          updated_at: new Date().toISOString(),
+        })
+        .then(function (result) {
+          if (result.error) throw result.error;
+          /* Edge Function şablonu bu dosyadan okunur (tek kaynak) */
+          return fetch(
+            new URL(
+              "../supabase/functions/notify-new-chapter/index.ts",
+              window.location.href
+            )
+          ).then(function (res) {
+            return res.text();
+          });
+        })
+        .then(function (code) {
+          if (code.indexOf("<") === 0) {
+            /* sunucu dosyayı kod olarak servis etmedi */
+            code =
+              "Edge Function dosyası yüklenemedi. GitHub'daki supabase/functions/notify-new-chapter/index.ts dosyasını aç, __VAPID_PUBLIC__ ve __VAPID_PRIVATE__ yerlerine ürettiğin anahtarları yaz.";
+          } else {
+            code = code
+              .replace("__VAPID_PUBLIC__", pendingPublicKey)
+              .replace("__VAPID_PRIVATE__", pendingPrivateKey);
+          }
+          edgeCodeEl.textContent = code;
+          edgeBlock.hidden = false;
+          statusEl.textContent =
+            "Kaydedildi. Kurulumu tamamla: Supabase → Edge Functions → Create a new function → adı notify-new-chapter → kodu yapıştır → Deploy.";
+        })
+        .catch(function (error) {
+          statusEl.textContent =
+            "Kaydedilemedi: " + ((error && error.message) || "?");
+        })
+        .then(function () {
+          saveBtn.disabled = false;
+        });
+    });
+
+    copyBtn.addEventListener("click", function () {
+      navigator.clipboard
+        .writeText(edgeCodeEl.textContent || "")
+        .then(function () {
+          copyBtn.textContent = "Kopyalandı ✓";
+          window.setTimeout(function () {
+            copyBtn.textContent = "Edge Function kodunu kopyala";
+          }, 2000);
+        })
+        .catch(function () {});
+    });
+
+    /* Mevcut anahtarı göster */
+    sup
+      .from("push_config")
+      .select("public_key")
+      .limit(1)
+      .maybeSingle()
+      .then(function (result) {
+        if (result && result.data && result.data.public_key) {
+          statusEl.textContent =
+            "Push anahtarı tanımlı ✓ (telefon abonelikleri kaydediliyor). Yenisini üretmek istersen VAPID anahtarı üret'e bas.";
+        }
+      });
   }
 
   /* ================= Season management ================= */

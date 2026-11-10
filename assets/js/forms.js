@@ -230,6 +230,147 @@
         } catch (e) {}
       });
     }
+
+    /* ---------- Telefon bildirimleri (Web Push + Ana Ekran) ----------
+       Web Push: bölüm yayınlanınca telefon kilit ekranına bildirim
+       düşer (iOS 16.4+; iPhone'da siteyi Ana Ekrana eklemek gerekir). */
+    var pushPanel = document.getElementById("push-panel");
+    if (pushPanel) {
+      var pushToggle = document.getElementById("push-toggle");
+      var pushStatus = document.getElementById("push-status");
+      var sup = window.VolmerraSupabase;
+      var pushSupported = !!(
+        sup &&
+        "serviceWorker" in navigator &&
+        "PushManager" in window &&
+        "Notification" in window
+      );
+      var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      var isStandalone =
+        (window.matchMedia &&
+          window.matchMedia("(display-mode: standalone)").matches) ||
+        navigator.standalone === true;
+
+      function setPushStatus(text, isOk) {
+        pushStatus.textContent = text;
+        pushStatus.style.color = isOk ? "" : "#a03434";
+      }
+
+      function pushKeyToBase64(buffer) {
+        var bytes = new Uint8Array(buffer);
+        var bin = "";
+        for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+        return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      }
+
+      function base64UrlToBytes(str) {
+        var b64 = str.replace(/-/g, "+").replace(/_/g, "/");
+        while (b64.length % 4) b64 += "=";
+        var bin = atob(b64);
+        var bytes = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return bytes;
+      }
+
+      function refreshPushState() {
+        if (!pushSupported) {
+          pushToggle.disabled = true;
+          if (isIOS && !isStandalone) {
+            setPushStatus(
+              "iPhone'da telefon bildirimleri için: Safari'de Paylaş → Ana Ekrana Ekle → siteyi oradan aç ve bu düğmeyi aç.",
+              false
+            );
+          } else {
+            setPushStatus("Bu tarayıcı telefon bildirimlerini desteklemiyor.", false);
+          }
+          return;
+        }
+        navigator.serviceWorker.ready
+          .then(function (reg) {
+            return reg.pushManager.getSubscription();
+          })
+          .then(function (sub) {
+            pushToggle.checked = !!sub;
+            if (pushToggle.checked) setPushStatus("Telefon bildirimleri açık.", true);
+          })
+          .catch(function () {});
+      }
+
+      pushToggle.addEventListener("change", function () {
+        var enable = pushToggle.checked;
+        pushToggle.disabled = true;
+        var done = function (msg, isOk) {
+          pushToggle.disabled = false;
+          if (msg) setPushStatus(msg, isOk);
+        };
+        navigator.serviceWorker.ready
+          .then(function (reg) {
+            if (!enable) {
+              return reg.pushManager
+                .getSubscription()
+                .then(function (sub) {
+                  var endpoint = sub ? sub.endpoint : null;
+                  var unsub = sub ? sub.unsubscribe() : Promise.resolve();
+                  return unsub.then(function () {
+                    if (!endpoint) return null;
+                    return sup
+                      .from("push_subscriptions")
+                      .delete()
+                      .eq("endpoint", endpoint);
+                  });
+                })
+                .then(function () {
+                  setPushStatus("Telefon bildirimleri kapalı.", true);
+                });
+            }
+            return sup
+              .from("push_config")
+              .select("public_key")
+              .limit(1)
+              .maybeSingle()
+              .then(function (result) {
+                var vapid =
+                  result && result.data && result.data.public_key;
+                if (!vapid) {
+                  throw new Error(
+                    "Bildirim anahtarı henüz ayarlanmamış. Yönetici Admin → Website → Telefon bildirimleri bölümünden VAPID anahtarı oluşturmalı."
+                  );
+                }
+                return reg.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: base64UrlToBytes(vapid),
+                });
+              })
+              .then(function (sub) {
+                return sup
+                  .from("push_subscriptions")
+                  .upsert({
+                    user_id: user.id,
+                    endpoint: sub.endpoint,
+                    p256dh: pushKeyToBase64(sub.getKey("p256dh")),
+                    auth: pushKeyToBase64(sub.getKey("auth")),
+                    user_agent: navigator.userAgent.slice(0, 200),
+                  });
+              })
+              .then(function () {
+                setPushStatus(
+                  "Telefon bildirimleri açıldı — yeni bölüm yayınlanınca telefonuna bildirim gelir.",
+                  true
+                );
+              });
+          })
+          .catch(function (error) {
+            pushToggle.checked = false;
+            done(
+              (error && error.message) ||
+                "Bildirim açılamadı — tekrar dene.",
+              false
+            );
+          });
+      });
+
+      refreshPushState();
+    }
     });
   });
 })();

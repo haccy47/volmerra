@@ -165,6 +165,20 @@ Setup:
    function and grants the admin role to the account named inside
    it — edit the email on the last line to match yours). The admin
    dashboard's "Database fix" card links to the same file.
+8. **Telefon bildirimleri (Web Push)**: new chapters notify
+   subscribers' phones. One-time setup: (a) run the push tables
+   block at the end of `supabase/schema.sql` (or re-run
+   `supabase/admin-fix.sql`), (b) Admin → Website → "Telefon
+   bildirimleri (Web Push)" → generate + save VAPID keys, (c) copy
+   the shown Edge Function code and deploy it in Supabase → Edge
+   Functions as `notify-new-chapter`. Readers open **Account
+   Settings → Telefon bildirimleri** and turn the toggle on —
+   on iPhone the site must first be added to the Home Screen
+   (Safari → Share → Add to Home Screen; requires iOS 16.4+).
+   Publishing then calls the Edge Function, which pushes to every
+   subscribed device; optionally add a `pg_cron` schedule that
+   POSTs the function every few minutes to also push scheduled
+   chapters that publish while nobody is online.
 
 Security model (enforced by RLS in `supabase/schema.sql`, not by the
 client):
