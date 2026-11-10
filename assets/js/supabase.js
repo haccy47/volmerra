@@ -482,15 +482,8 @@
      data-layer scripts have run. Attach only once every module
      exists, otherwise wait for DOMContentLoaded. */
   function attachAdapters() {
-    var missing =
-      !window.VolmerraAuth ||
-      !window.VolmerraChapters ||
-      !window.VolmerraCMS ||
-      !window.VolmerraComments ||
-      !window.VolmerraLibrary;
-    if (missing) {
-      window.VOLMERRA_ATTACH_STAGE = "waiting-modules";
-      document.addEventListener("DOMContentLoaded", attachAdapters, {
+    if (!window.VolmerraAuth) {
+      document.addEventListener("volmerra:backend-ready", attachAdapters, {
         once: true,
       });
       return;
@@ -501,25 +494,33 @@
        stop the whole backend from attaching — accounts and content
        sync matter more than any single optional integration. */
     window.VolmerraAuth.setAdapter(authAdapter);
-    try {
-      window.VolmerraChapters.setAdapter(chaptersAdapter);
-    } catch (error) {
-      console.warn("Volmerra: chapters module is stale — reload the page to sync it.", error);
+    if (window.VolmerraChapters) {
+      try {
+        window.VolmerraChapters.setAdapter(chaptersAdapter);
+      } catch (error) {
+        console.warn("Volmerra: chapters module is stale — reload the page to sync it.", error);
+      }
     }
-    try {
-      window.VolmerraCMS.setAdapter(cmsAdapter);
-    } catch (error) {
-      console.warn("Volmerra: cms module is stale — reload the page to sync it.", error);
+    if (window.VolmerraCMS) {
+      try {
+        window.VolmerraCMS.setAdapter(cmsAdapter);
+      } catch (error) {
+        console.warn("Volmerra: cms module is stale — reload the page to sync it.", error);
+      }
     }
-    try {
-      window.VolmerraComments.setAdapter(commentsAdapter);
-    } catch (error) {
-      console.warn("Volmerra: comments module is stale — reload the page to sync it.", error);
+    if (window.VolmerraComments) {
+      try {
+        window.VolmerraComments.setAdapter(commentsAdapter);
+      } catch (error) {
+        console.warn("Volmerra: comments module is stale — reload the page to sync it.", error);
+      }
     }
-    try {
-      window.VolmerraLibrary.setAdapter(libraryAdapter);
-    } catch (error) {
-      console.warn("Volmerra: library module is stale — reload the page to sync it.", error);
+    if (window.VolmerraLibrary) {
+      try {
+        window.VolmerraLibrary.setAdapter(libraryAdapter);
+      } catch (error) {
+        console.warn("Volmerra: library module is stale — reload the page to sync it.", error);
+      }
     }
     /* Public diagnostic flag: the real backend is attached. Set
        unconditionally — a stale optional module degrades its own

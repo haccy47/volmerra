@@ -38,7 +38,7 @@
      the localStorage adapters below.
      Every dynamically loaded script carries a version query so
      browsers never run a stale cached copy after a new publish. */
-  var BACKEND_VERSION = "2";
+  var BACKEND_VERSION = "3";
   var SELF_SRC = document.currentScript
     ? document.currentScript.src
     : null;
