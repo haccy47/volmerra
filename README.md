@@ -158,6 +158,13 @@ Setup:
    database by id (existing backend entries are never overwritten).
    Every change made *after* the backend is connected syncs to every
    device automatically.
+7. **Troubleshooting "new row violates row-level security policy
+   for table site_state"**: if publishing or CMS edits fail with
+   this error, run `supabase/admin-fix.sql` once in the Supabase
+   SQL Editor (it installs the server-side `upsert_state` write
+   function and grants the admin role to the account named inside
+   it — edit the email on the last line to match yours). The admin
+   dashboard's "Database fix" card links to the same file.
 
 Security model (enforced by RLS in `supabase/schema.sql`, not by the
 client):
