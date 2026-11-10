@@ -295,7 +295,23 @@
         return client
           .rpc("upsert_state", { p_key: key, p_data: data })
           .then(function (result) {
-            if (result.error) throw result.error;
+            if (result.error) {
+              var msg = result.error.message || "";
+              /* The upsert_state function is installed by
+                 supabase/admin-fix.sql; if that script was never run,
+                 the RPC does not exist yet — say so instead of a raw
+                 "function does not exist" error. */
+              if (
+                msg.indexOf("does not exist") !== -1 ||
+                msg.indexOf("schema cache") !== -1 ||
+                result.error.code === "PGRST202"
+              ) {
+                throw new Error(
+                  "Veritabanı fonksiyonları kurulu değil — Supabase SQL Editor'de supabase/admin-fix.sql scriptini çalıştır ve tekrar dene."
+                );
+              }
+              throw result.error;
+            }
           });
       },
     };
