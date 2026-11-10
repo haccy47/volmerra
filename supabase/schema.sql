@@ -299,6 +299,47 @@ $$;
 -- 4) Comments (guests read; authors edit/delete their own)
 -- ------------------------------------------------------------
 
+-- Admin content writes (chapters + CMS) go through this RPC instead
+-- of direct table writes: it verifies the caller's admin role
+-- server-side and reports precise, human-readable errors (expired
+-- session, wrong account) instead of a raw row-level security
+-- violation.
+create or replace function public.upsert_state(p_key text, p_data jsonb)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid   uuid := auth.uid();
+  v_admin boolean;
+begin
+  if p_key not in ('chapters', 'cms') then
+    raise exception 'Unknown state key: %', p_key;
+  end if;
+
+  select coalesce(is_admin, false) into v_admin
+    from public.profiles where id = v_uid;
+
+  if v_uid is null then
+    raise exception 'Oturum bulunamadı — sayfayı yenile ve tekrar giriş yap (oturum jetonu geçersiz).';
+  end if;
+
+  if not v_admin then
+    raise exception 'Bu hesap yönetici değil: % (uid: %). Admin olan hesapla giriş yap veya SQL Editorde bu hesaba yetki ver.',
+      coalesce((select display_name from public.profiles where id = v_uid), 'profil yok'),
+      v_uid;
+  end if;
+
+  insert into public.site_state (key, data, updated_at)
+  values (p_key, p_data, now())
+  on conflict (key) do update
+    set data = excluded.data, updated_at = now();
+
+  return jsonb_build_object('ok', true, 'uid', v_uid, 'admin', true);
+end;
+$$;
+
 create table if not exists public.comments (
   id            uuid primary key default gen_random_uuid(),
   chapter_id    text not null,
@@ -407,7 +448,8 @@ grant execute on function
   public.has_admin(),
   public.claim_admin(),
   public.read_state(text),
-  public.publish_due_chapters()
+  public.publish_due_chapters(),
+  public.upsert_state(text, jsonb)
 to anon, authenticated;
 
 -- ------------------------------------------------------------
