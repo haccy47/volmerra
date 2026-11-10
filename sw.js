@@ -43,3 +43,28 @@ self.addEventListener("notificationclick", function (event) {
       })
   );
 });
+
+/* ---------- Güncellik garantisi ----------
+   Sitede yapılan her yeni publish, tarayıcı ve ara önbelleklerin
+   "bunu biliyorum" demesine rağmen kullanıcıya ulaşır: site
+   scriptleri (assets/js) ve sayfalar her yüklemede ağdan taze
+   alınır; çevrimdışıysa önbellekteki son kopya yedek olarak
+   servis edilir. Böylece eski JS çalıştırma sorunu bir daha
+   yaşanmaz. */
+self.addEventListener("fetch", function (event) {
+  var request = event.request;
+  if (request.method !== "GET") return;
+  var isAsset =
+    request.url.indexOf("/assets/js/") !== -1 ||
+    request.url.indexOf("/manifest.json") !== -1;
+  var isNavigation = request.mode === "navigate";
+  if (!isAsset && !isNavigation) return;
+
+  event.respondWith(
+    fetch(request, { cache: "no-store" }).catch(function () {
+      return caches.match(request).then(function (cached) {
+        return cached || new Response("Çevrimdışı", { status: 503 });
+      });
+    })
+  );
+});

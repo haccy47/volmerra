@@ -553,7 +553,7 @@
     if (siteRoot) {
       window.addEventListener("load", function () {
         navigator.serviceWorker
-          .register(siteRoot + "sw.js?v=2")
+          .register(siteRoot + "sw.js?v=3")
           .catch(function (error) {
             console.warn("SW kaydı başarısız:", error);
           });
@@ -562,7 +562,7 @@
     try {
       var manifestLink = document.createElement("link");
       manifestLink.rel = "manifest";
-      manifestLink.href = siteRoot + "manifest.json?v=2";
+      manifestLink.href = siteRoot + "manifest.json?v=3";
       document.head.appendChild(manifestLink);
     } catch (e) {
       /* manifest enjekte edilemezse bildirim özelliği pas geçilir */
