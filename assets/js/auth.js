@@ -71,6 +71,10 @@
         window.VOLMERRA_BACKEND = cfg;
         window.VOLMERRA_BACKEND_CONFIGURED = true;
         window.VOLMERRA_BACKEND_STARTED_AT = Date.now();
+        /* The badge appears right away — well before the 215 KB
+           client library finishes loading — so the user always sees
+           connection progress instead of nothing. */
+        startDbBadge();
         /* The Supabase client library is vendored locally
            (assets/js/vendor/supabase.js) so the site never depends
            on a third-party CDN — some networks block CDNs, and a
@@ -505,11 +509,10 @@
     }
   }
   var badgeTimer = null;
-  document.addEventListener("volmerra:backend-ready", function () {
-    document.addEventListener("volmerra:auth-ready", updateDbBadge);
+  function startDbBadge() {
+    if (badgeTimer) return;
     updateDbBadge();
-    if (!badgeTimer) {
-      badgeTimer = window.setInterval(updateDbBadge, 1000);
-    }
-  });
+    badgeTimer = window.setInterval(updateDbBadge, 1000);
+  }
+  document.addEventListener("volmerra:auth-ready", updateDbBadge);
 })();
