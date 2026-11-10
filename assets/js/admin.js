@@ -645,11 +645,25 @@
   }
 
   function initForm() {
-    if (!window.VolmerraAuth.isAdmin()) {
-      window.location.replace("index.html");
+    /* The real backend restores the session (and the cached admin
+       role) asynchronously: this page used to bounce admins straight
+       back to the dashboard because the role check ran before the
+       session had landed. Wait for the session first; redirect only
+       if the account is confirmed not to be an administrator. */
+    if (window.VolmerraAuth.isAdmin()) {
+      setupForm();
       return;
     }
+    window.VolmerraAuth.whenReady(function () {
+      if (window.VolmerraAuth.isAdmin()) {
+        setupForm();
+      } else {
+        window.location.replace("index.html");
+      }
+    });
+  }
 
+  function setupForm() {
     var form = document.getElementById("chapter-form");
     var errorBox = form.querySelector(".form-error");
     var heading = document.getElementById("form-heading");
