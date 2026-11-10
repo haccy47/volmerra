@@ -1,14 +1,15 @@
 -- ============================================================
--- VOLMERRA — Supabase schema (v1)
+-- VOLMERRA — Supabase schema (v1, idempotent)
 -- ------------------------------------------------------------
 -- Run the whole file in the Supabase dashboard → SQL Editor.
--- Idempotent-friendly structure; run once on a fresh project.
+-- Safe to re-run any time: existing tables, policies and
+-- triggers are kept, missing ones are created.
 --
 -- What it creates:
 --   profiles          one row per account (display name, avatar,
 --                     bio, is_admin role)
 --   site_state        document store for chapters + CMS data
---                     (admins write, reads go through RPCs)
+--                     (admins write, reads through RPCs)
 --   comments          chapter comments (replies via parent_id)
 --   comment_likes     one like per user per comment
 --   library           per-user reading library (JSON document)
@@ -85,7 +86,7 @@ $$;
 -- 2) Profiles
 -- ------------------------------------------------------------
 
-create table public.profiles (
+create table if not exists public.profiles (
   id           uuid primary key references auth.users (id) on delete cascade,
   display_name text not null default 'Reader',
   email        text not null default '',
@@ -121,20 +122,25 @@ begin
 end;
 $$;
 
+drop trigger if exists on_auth_user_created on auth.users;
+
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+drop policy if exists "profiles: read own or admins" on public.profiles;
 create policy "profiles: read own or admins"
   on public.profiles for select
   using (id = auth.uid() or public.is_admin());
 
+drop policy if exists "profiles: insert own" on public.profiles;
 create policy "profiles: insert own"
   on public.profiles for insert
   with check (id = auth.uid());
 
 -- A user may update their own profile but can never change their
 -- own role; administrators can manage every profile.
+drop policy if exists "profiles: update own without changing role" on public.profiles;
 create policy "profiles: update own without changing role"
   on public.profiles for update
   using (id = auth.uid())
@@ -143,6 +149,7 @@ create policy "profiles: update own without changing role"
     and is_admin = public.is_admin()
   );
 
+drop policy if exists "profiles: admins manage every profile" on public.profiles;
 create policy "profiles: admins manage every profile"
   on public.profiles for update
   using (public.is_admin())
@@ -152,7 +159,7 @@ create policy "profiles: admins manage every profile"
 -- 3) site_state — chapters + CMS document store
 -- ------------------------------------------------------------
 
-create table public.site_state (
+create table if not exists public.site_state (
   key        text primary key,
   data       jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()
@@ -162,15 +169,18 @@ alter table public.site_state enable row level security;
 
 -- No SELECT policy on purpose: direct reads are impossible.
 -- Public/admin reads go through read_state(), writes need admin.
+drop policy if exists "site_state: admins insert" on public.site_state;
 create policy "site_state: admins insert"
   on public.site_state for insert
   with check (public.is_admin());
 
+drop policy if exists "site_state: admins update" on public.site_state;
 create policy "site_state: admins update"
   on public.site_state for update
   using (public.is_admin())
   with check (public.is_admin());
 
+drop policy if exists "site_state: admins delete" on public.site_state;
 create policy "site_state: admins delete"
   on public.site_state for delete
   using (public.is_admin());
@@ -289,7 +299,7 @@ $$;
 -- 4) Comments (guests read; authors edit/delete their own)
 -- ------------------------------------------------------------
 
-create table public.comments (
+create table if not exists public.comments (
   id            uuid primary key default gen_random_uuid(),
   chapter_id    text not null,
   parent_id     uuid references public.comments (id) on delete cascade,
@@ -302,28 +312,33 @@ create table public.comments (
   updated_at    timestamptz not null default now()
 );
 
-create index comments_chapter_idx on public.comments (chapter_id, created_at);
+create index if not exists comments_chapter_idx
+  on public.comments (chapter_id, created_at);
 
 alter table public.comments enable row level security;
 
+drop policy if exists "comments: everyone reads" on public.comments;
 create policy "comments: everyone reads"
   on public.comments for select
   using (true);
 
+drop policy if exists "comments: signed-in users write their own" on public.comments;
 create policy "comments: signed-in users write their own"
   on public.comments for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "comments: only the author edits" on public.comments;
 create policy "comments: only the author edits"
   on public.comments for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+drop policy if exists "comments: only the author deletes" on public.comments;
 create policy "comments: only the author deletes"
   on public.comments for delete
   using (auth.uid() = user_id);
 
-create table public.comment_likes (
+create table if not exists public.comment_likes (
   comment_id uuid not null references public.comments (id) on delete cascade,
   user_id    uuid not null references auth.users (id) on delete cascade,
   created_at timestamptz not null default now(),
@@ -332,14 +347,17 @@ create table public.comment_likes (
 
 alter table public.comment_likes enable row level security;
 
+drop policy if exists "comment_likes: everyone reads" on public.comment_likes;
 create policy "comment_likes: everyone reads"
   on public.comment_likes for select
   using (true);
 
+drop policy if exists "comment_likes: own like insert" on public.comment_likes;
 create policy "comment_likes: own like insert"
   on public.comment_likes for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "comment_likes: own like delete" on public.comment_likes;
 create policy "comment_likes: own like delete"
   on public.comment_likes for delete
   using (auth.uid() = user_id);
@@ -348,7 +366,7 @@ create policy "comment_likes: own like delete"
 -- 5) Library (per-user reading progress / favorites / saved)
 -- ------------------------------------------------------------
 
-create table public.library (
+create table if not exists public.library (
   user_id    uuid primary key references auth.users (id) on delete cascade,
   data       jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()
@@ -356,19 +374,23 @@ create table public.library (
 
 alter table public.library enable row level security;
 
+drop policy if exists "library: owner reads" on public.library;
 create policy "library: owner reads"
   on public.library for select
   using (auth.uid() = user_id);
 
+drop policy if exists "library: owner inserts" on public.library;
 create policy "library: owner inserts"
   on public.library for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "library: owner updates" on public.library;
 create policy "library: owner updates"
   on public.library for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+drop policy if exists "library: owner deletes" on public.library;
 create policy "library: owner deletes"
   on public.library for delete
   using (auth.uid() = user_id);
