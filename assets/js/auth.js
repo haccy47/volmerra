@@ -66,17 +66,26 @@
           : null);
       if (cfg && cfg.url && cfg.anonKey) {
         window.VOLMERRA_BACKEND = cfg;
+        /* The Supabase client library is vendored locally
+           (assets/js/vendor/supabase.js) so the site never depends
+           on a third-party CDN — some networks block CDNs, and a
+           failed load used to silently fall back to localStorage. */
         var cdn = document.createElement("script");
-        cdn.src =
-          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js";
+        cdn.src = dir + "vendor/supabase.js";
         cdn.onload = function () {
           var backend = document.createElement("script");
           backend.src = dir + "supabase.js";
           backend.onload = done;
-          backend.onerror = done;
+          backend.onerror = function () {
+            console.warn("Volmerra: supabase.js could not be loaded — staying on the localStorage adapters.");
+            done();
+          };
           document.head.appendChild(backend);
         };
-        cdn.onerror = done;
+        cdn.onerror = function () {
+          console.warn("Volmerra: the Supabase client library could not be loaded — staying on the localStorage adapters.");
+          done();
+        };
         document.head.appendChild(cdn);
       } else {
         done();

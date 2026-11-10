@@ -127,8 +127,10 @@ The site keeps its swappable adapter architecture: `assets/js/
 supabase.js` attaches real backends to `VolmerraAuth`, `VolmerraCh
 apters`, `VolmerraCMS`, `VolmerraComments` and `VolmerraLibrary`
 without touching any UI code. `auth.js` loads `config.js` → the
-Supabase client library (CDN) → `supabase.js` automatically on every
-page; without `config.js` the localStorage adapters stay active.
+vendored Supabase client library (`assets/js/vendor/supabase.js`,
+no external CDN — some networks block CDNs) → `supabase.js`
+automatically on every page; without `config.js` the localStorage
+adapters stay active.
 
 Setup:
 
