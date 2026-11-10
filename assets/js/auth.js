@@ -35,7 +35,10 @@
      window.VOLMERRA_BACKEND, the Supabase client library and the
      adapter module are loaded and every data layer swaps to the
      real backend. A missing config.js silently keeps the site on
-     the localStorage adapters below. */
+     the localStorage adapters below.
+     Every dynamically loaded script carries a version query so
+     browsers never run a stale cached copy after a new publish. */
+  var BACKEND_VERSION = "2";
   var SELF_SRC = document.currentScript
     ? document.currentScript.src
     : null;
@@ -51,7 +54,7 @@
     }
     var dir = SELF_SRC.replace(/[^/]*$/, "");
     var config = document.createElement("script");
-    config.src = dir + "config.js";
+    config.src = dir + "config.js?v=" + BACKEND_VERSION;
     config.onload = function () {
       /* Two accepted shapes:
          window.VOLMERRA_BACKEND = { url, anonKey }  (canonical)
@@ -71,10 +74,10 @@
            on a third-party CDN — some networks block CDNs, and a
            failed load used to silently fall back to localStorage. */
         var cdn = document.createElement("script");
-        cdn.src = dir + "vendor/supabase.js";
+        cdn.src = dir + "vendor/supabase.js?v=" + BACKEND_VERSION;
         cdn.onload = function () {
           var backend = document.createElement("script");
-          backend.src = dir + "supabase.js";
+          backend.src = dir + "supabase.js?v=" + BACKEND_VERSION;
           backend.onload = done;
           backend.onerror = function () {
             console.warn("Volmerra: supabase.js could not be loaded — staying on the localStorage adapters.");
