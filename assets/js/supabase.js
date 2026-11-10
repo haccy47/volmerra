@@ -287,15 +287,45 @@
           });
       },
       write: function (data) {
-        return client
-          .from("site_state")
-          .upsert(
-            { key: key, data: data, updated_at: now() },
-            { onConflict: "key" }
-          )
-          .then(function (result) {
-            if (result.error) throw result.error;
-          });
+        /* Admin writes are gated on the JWT's role: an expired
+           access token makes the request look anonymous and the
+           write fails with a raw RLS violation. Refresh the session
+           first (best effort) and, if the write is still rejected
+           after a failed refresh, explain that in plain words. */
+        var prep =
+          state.user
+            ? client
+                .auth.refreshSession()
+                .then(function (result) {
+                  return !result.error;
+                })
+                .catch(function () {
+                  return false;
+                })
+            : Promise.resolve(true);
+        return prep.then(function (refreshed) {
+          return client
+            .from("site_state")
+            .upsert(
+              { key: key, data: data, updated_at: now() },
+              { onConflict: "key" }
+            )
+            .then(function (result) {
+              if (result.error) {
+                if (
+                  !refreshed &&
+                  (result.error.message || "").indexOf(
+                    "row-level security"
+                  ) !== -1
+                ) {
+                  throw new Error(
+                    "Oturumun süresi doldu — sayfayı yenile ve tekrar giriş yap. (Your session expired — reload the page and sign in again.)"
+                  );
+                }
+                throw result.error;
+              }
+            });
+        });
       },
     };
   }
