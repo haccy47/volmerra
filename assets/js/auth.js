@@ -70,6 +70,7 @@
       if (cfg && cfg.url && cfg.anonKey) {
         window.VOLMERRA_BACKEND = cfg;
         window.VOLMERRA_BACKEND_CONFIGURED = true;
+        window.VOLMERRA_BACKEND_STARTED_AT = Date.now();
         /* The Supabase client library is vendored locally
            (assets/js/vendor/supabase.js) so the site never depends
            on a third-party CDN — some networks block CDNs, and a
@@ -484,16 +485,31 @@
     if (window.VOLMERRA_BACKEND_ACTIVE) {
       badge.textContent = "DB: Supabase ✓";
       badge.style.background = "#1d7a3a";
+      if (badgeTimer) {
+        window.clearInterval(badgeTimer);
+        badgeTimer = null;
+      }
+      return;
+    }
+    /* The backend chain (config → 215 KB client library → adapter
+       module → session restore) can take several seconds on a slow
+       mobile connection: show a connecting state first and only
+       declare the connection dead after a generous window. */
+    var elapsed = Date.now() - (window.VOLMERRA_BACKEND_STARTED_AT || Date.now());
+    if (elapsed < 15000) {
+      badge.textContent = "DB: bağlanıyor…";
+      badge.style.background = "#b98a1f";
     } else {
       badge.textContent = "DB: OFFLINE — sayfayı yenile";
       badge.style.background = "#a03434";
     }
   }
+  var badgeTimer = null;
   document.addEventListener("volmerra:backend-ready", function () {
     document.addEventListener("volmerra:auth-ready", updateDbBadge);
     updateDbBadge();
-    /* Final verdict: if the backend never attaches, the badge turns
-       red after a short wait instead of staying ambiguous. */
-    window.setTimeout(updateDbBadge, 4000);
+    if (!badgeTimer) {
+      badgeTimer = window.setInterval(updateDbBadge, 1000);
+    }
   });
 })();
