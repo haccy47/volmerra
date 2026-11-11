@@ -73,14 +73,17 @@ create table if not exists public.push_subscriptions (
 
 alter table public.push_subscriptions enable row level security;
 
+drop policy if exists "push_subscriptions: owner reads own" on public.push_subscriptions;
 create policy "push_subscriptions: owner reads own"
   on public.push_subscriptions for select
   using (auth.uid() = user_id);
 
+drop policy if exists "push_subscriptions: owner inserts own" on public.push_subscriptions;
 create policy "push_subscriptions: owner inserts own"
   on public.push_subscriptions for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "push_subscriptions: owner deletes own" on public.push_subscriptions;
 create policy "push_subscriptions: owner deletes own"
   on public.push_subscriptions for delete
   using (auth.uid() = user_id);
@@ -93,14 +96,17 @@ create table if not exists public.push_config (
 
 alter table public.push_config enable row level security;
 
+drop policy if exists "push_config: herkes okur" on public.push_config;
 create policy "push_config: herkes okur"
   on public.push_config for select
   using (true);
 
+drop policy if exists "push_config: admin yazar (insert)" on public.push_config;
 create policy "push_config: admin yazar (insert)"
   on public.push_config for insert
   with check (public.is_admin());
 
+drop policy if exists "push_config: admin yazar (update)" on public.push_config;
 create policy "push_config: admin yazar (update)"
   on public.push_config for update
   using (public.is_admin())
