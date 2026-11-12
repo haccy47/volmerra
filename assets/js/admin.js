@@ -1975,9 +1975,12 @@
             code =
               "Edge Function dosyası yüklenemedi. GitHub'daki supabase/functions/notify-new-chapter/index.ts dosyasını aç, __VAPID_PUBLIC__ ve __VAPID_PRIVATE__ yerlerine ürettiğin anahtarları yaz.";
           } else {
+            /* split/join: TÜM eşleşmeleri değiştir — replace yalnızca
+               ilkini değiştirir ve şablon başındaki açıklama satırına
+               yazar, asıl sabitler boş kalırdı. */
             code = code
-              .replace("__VAPID_PUBLIC__", pendingPublicKey)
-              .replace("__VAPID_PRIVATE__", pendingPrivateKey);
+              .split("__VAPID_PUBLIC__").join(pendingPublicKey)
+              .split("__VAPID_PRIVATE__").join(pendingPrivateKey);
           }
           edgeCodeEl.textContent = code;
           edgeBlock.hidden = false;
