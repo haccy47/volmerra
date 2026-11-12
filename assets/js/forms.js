@@ -238,7 +238,7 @@
     if (pushPanel) {
       var pushToggle = document.getElementById("push-toggle");
       var pushStatus = document.getElementById("push-status");
-      var sup = window.VolmerraSupabase;
+      var sup = window.VolmerraSupabase || window.VOLMERRA_SUPABASE;
       var pushSupported = !!(
         sup &&
         "serviceWorker" in navigator &&

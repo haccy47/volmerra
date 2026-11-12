@@ -54,8 +54,11 @@
     },
   });
 
-  /* Gerekli yerlerde (ör. push aboneliği) doğrudan erişim için */
+  /* Gerekli yerlerde (ör. push aboneliği) doğrudan erişim için.
+     İki ad birden tanımlanır: VOLMERRA_SUPABASE (kanonik) ve
+     VolmerraSupabase (admin.js / forms.js'in okuduğu ad). */
   window.VOLMERRA_SUPABASE = client;
+  window.VolmerraSupabase = client;
 
   var state = { user: null, ready: false };
 

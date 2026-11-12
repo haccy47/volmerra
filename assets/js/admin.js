@@ -1875,13 +1875,40 @@
     var edgeBlock = document.getElementById("push-edge-block");
     var edgeCodeEl = document.getElementById("push-edge-code");
     var copyBtn = document.getElementById("push-copy");
-    var sup = window.VolmerraSupabase;
+    /* guardAdmin oturum geldiğinde bu işlevi yeniden çağırır:
+       paneli yalnızca bir kez bağla ve adaptörün tanımlayabileceği
+       her iki global adı da kabul et. */
+    if (generateBtn.dataset.pushInit) return;
+    var sup = window.VolmerraSupabase || window.VOLMERRA_SUPABASE;
     if (!sup) {
+      /* Backend zinciri (config → istemci kütüphanesi → adaptör)
+         eşzamansız yüklenir ve sayfa açıldığında hâlâ sürebilir:
+         ilk bakışta "ölü" deme. Bağlanana dek yeniden dene. */
+      if (
+        window.VOLMERRA_BACKEND_CONFIGURED &&
+        !window.VOLMERRA_BACKEND_ACTIVE
+      ) {
+        var attempt = parseInt(generateBtn.dataset.pushRetry || "0", 10) + 1;
+        generateBtn.dataset.pushRetry = String(attempt);
+        if (attempt <= 40) {
+          statusEl.textContent =
+            "Veritabanına bağlanılıyor… (push kurulumu bağlanınca açılır)";
+          window.setTimeout(initPushAdmin, 700);
+          return;
+        }
+        statusEl.textContent =
+          "Veritabanı bağlantısı kurulamadı — sayfayı yenile ve tekrar dene.";
+        generateBtn.disabled = true;
+        return;
+      }
       statusEl.textContent =
         "Veritabanı bağlantısı yok (config.js) — push kurulamaz.";
       generateBtn.disabled = true;
       return;
     }
+    generateBtn.dataset.pushInit = "1";
+    generateBtn.dataset.pushRetry = "";
+    generateBtn.disabled = false;
 
     function b64url(buffer) {
       var bytes = new Uint8Array(buffer);
