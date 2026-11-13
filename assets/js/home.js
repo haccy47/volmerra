@@ -468,10 +468,28 @@
 
   function dismissPushInvite() {
     var banner = document.getElementById("push-invite");
-    if (banner) banner.hidden = true;
+    if (!banner) return;
+    /* × : panel aşağı kayarak kapanır, kararı hatırlarız. */
+    banner.classList.add("is-leaving");
+    window.setTimeout(function () {
+      banner.hidden = true;
+      banner.classList.remove("is-visible");
+      banner.classList.remove("is-leaving");
+    }, 320);
     try {
       localStorage.setItem(PUSH_INVITE_KEY, "1");
     } catch (e) {}
+  }
+
+  function showPushInvite(banner) {
+    banner.hidden = false;
+    /* İki kare bekle: tarayıcı önce "gizli" halini işlesin, sonra
+       yumuşak yükseliş animasyonu oynasın. */
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () {
+        banner.classList.add("is-visible");
+      });
+    });
   }
 
   function initPushInvite() {
@@ -507,7 +525,7 @@
         window.location.href = "pages/settings.html";
       });
       closeBtn.addEventListener("click", dismissPushInvite);
-      banner.hidden = false;
+      showPushInvite(banner);
       return;
     }
 
@@ -520,7 +538,7 @@
       })
       .then(function (sub) {
         if (sub) return;
-        banner.hidden = false;
+        showPushInvite(banner);
       })
       .catch(function () {});
 
@@ -568,8 +586,14 @@
           textEl.innerHTML =
             "<strong>Hazır!</strong> Yeni bölüm yayınlandığında telefonuna bildirim düşecek.";
           enableBtn.hidden = true;
+          /* Onay mesajı kısa görünür, sonra panel aşağı kayarak çıkar. */
           window.setTimeout(function () {
-            banner.hidden = true;
+            banner.classList.add("is-leaving");
+            window.setTimeout(function () {
+              banner.hidden = true;
+              banner.classList.remove("is-visible");
+              banner.classList.remove("is-leaving");
+            }, 320);
           }, 3500);
         })
         .catch(function (error) {
