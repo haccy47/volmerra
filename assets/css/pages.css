@@ -2413,3 +2413,21 @@ img.portrait-thumb {
 .profile-bio p + p {
   margin-top: var(--space-4);
 }
+
+/* Mobilde bildirim paneli ekrana oturur: zile göre mutlak konum
+   yerine, mobil alt navigasyonun üstünde sabit bir alt sayfa olarak
+   açılır — dar ekrandan taşmaz, ekran dışına kaybolmaz. */
+@media (max-width: 767px) {
+  .notif-panel {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    top: auto;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    max-height: 65vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    z-index: 950;
+  }
+}

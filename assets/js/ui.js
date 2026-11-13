@@ -390,53 +390,61 @@
     });
   }
 
+  /* Every bell on the page (desktop header bell AND the mobile top
+     bell) gets its own click handler bound to ITS OWN panel. The old
+     code wired only the FIRST match in the DOM — on a phone that was
+     the hidden desktop bell, so the visible mobile bell did nothing. */
   function wireNotifications() {
-    var panel = document.querySelector(".notif-panel");
-    var toggle = document.querySelector("[data-notif-toggle]");
-    if (!toggle || !panel) return;
+    document.querySelectorAll("[data-notif-toggle]").forEach(function (toggle) {
+      var panel = toggle.parentElement.querySelector(".notif-panel");
+      if (!panel) return;
 
-    toggle.addEventListener("click", function (event) {
-      event.stopPropagation();
-      var wasHidden = panel.hidden;
-      document.querySelectorAll(".notif-panel").forEach(function (p) {
-        p.hidden = true;
-      });
-      panel.hidden = !wasHidden;
-      toggle.setAttribute("aria-expanded", String(panel.hidden === false));
-      if (panel.hidden === false) {
-        /* Opening the panel marks everything as read. */
-        if (window.VolmerraNotifications) {
-          window.VolmerraNotifications.markAllRead();
+      toggle.addEventListener("click", function (event) {
+        event.stopPropagation();
+        var wasHidden = panel.hidden;
+        document.querySelectorAll(".notif-panel").forEach(function (p) {
+          p.hidden = true;
+        });
+        panel.hidden = !wasHidden;
+        toggle.setAttribute("aria-expanded", String(panel.hidden === false));
+        if (panel.hidden === false) {
+          /* Opening the panel rebuilds it with the CURRENT session
+             state and marks everything as read. */
+          if (window.VolmerraNotifications) {
+            window.VolmerraNotifications.markAllRead();
+          }
           panel.innerHTML = notifPanelHtml();
           wireNotifications();
           updateNotifBadges();
         }
-      }
+      });
     });
 
-    document.addEventListener("click", function (event) {
-      if (
-        panel.hidden === false &&
-        !event.target.closest(".notif-wrap") &&
-        !event.target.closest("[data-notif-toggle]")
-      ) {
-        panel.hidden = true;
-        toggle.setAttribute("aria-expanded", "false");
-      }
-    });
-
-    var mark = panel.querySelector("[data-notif-read]");
-    if (mark) {
+    document.querySelectorAll("[data-notif-read]").forEach(function (mark) {
       mark.addEventListener("click", function () {
         if (window.VolmerraNotifications) {
           window.VolmerraNotifications.markAllRead();
-          panel.innerHTML = notifPanelHtml();
+          document.querySelectorAll(".notif-panel").forEach(function (panel) {
+            panel.innerHTML = notifPanelHtml();
+          });
           wireNotifications();
           updateNotifBadges();
         }
       });
-    }
+    });
   }
+
+  /* Clicking anywhere outside a bell closes every open panel. Bound
+     ONCE at module level so re-wiring never stacks copies of it. */
+  document.addEventListener("click", function (event) {
+    if (event.target.closest(".notif-wrap")) return;
+    document.querySelectorAll(".notif-panel").forEach(function (p) {
+      p.hidden = true;
+    });
+    document.querySelectorAll("[data-notif-toggle]").forEach(function (t) {
+      t.setAttribute("aria-expanded", "false");
+    });
+  });
 
   function updateNotifBadges() {
     var unread = window.VolmerraNotifications
