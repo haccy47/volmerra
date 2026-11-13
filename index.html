@@ -264,6 +264,21 @@
          ====================================================== -->
     <section id="home-member" hidden>
 
+      <!-- Bildirim davet paneli — giriş yapan okuyucuya bir kez gösterilir;
+           istemeyen üstteki × ile kapatır (kararı tarayıcıda saklanır). -->
+      <div class="container" id="push-invite" hidden>
+        <div class="push-invite">
+          <p class="push-invite-text" id="push-invite-text">
+            <strong>Yeni bölümlerden haberdar ol.</strong>
+            Yayınlanan bölümler telefonuna bildirim olarak düşsün.
+          </p>
+          <button class="btn btn--primary btn--sm" id="push-invite-enable" type="button">
+            Bildirimlere izin ver
+          </button>
+          <button class="push-invite-close" id="push-invite-close" type="button" aria-label="Kapat">&times;</button>
+        </div>
+      </div>
+
       <div class="container member-greeting">
         <p class="eyebrow">Your reading home</p>
         <h1>Welcome back, <span id="member-name"></span></h1>

@@ -670,3 +670,46 @@ a.card:hover {
     scroll-behavior: auto !important;
   }
 }
+
+
+/* ---------- Push invite banner (homepage) ----------
+   Giriş yapan okuyucuya bildirim izni daveti; × ile kapatılır. */
+.push-invite {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-5);
+  background: var(--season-accent-soft);
+  border: 1px solid var(--season-accent-border);
+  border-radius: var(--radius-md);
+}
+
+.push-invite-text {
+  flex: 1 1 240px;
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.push-invite-text strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.push-invite-close {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  border-radius: var(--radius-full);
+}
+
+.push-invite-close:hover {
+  color: var(--text);
+}

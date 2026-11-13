@@ -430,6 +430,164 @@
   });
 
   /* ============================================================
+     Bildirim davet paneli (girişten sonra ana sayfada)
+     ------------------------------------------------------------
+     Hesabı olan okuyucuya, bildirimlerini açmamışsa bir kez
+     gösterilir: "yayınlanan bölümlerden haberdar olmak için
+     bildirimlere izin ver". × ile kapatılırsa kararı tarayıcıda
+     saklanır ve bir daha gösterilmez. iPhone'da izin ancak site
+     Ana Ekran'a eklenip oradan açılınca verilebildiği için
+     kullanıcı o durumda ayarlar sayfasına yönlendirilir.
+     ============================================================ */
+  var PUSH_INVITE_KEY = "volmerra:push-invite-dismissed";
+
+  function pushInviteSupported() {
+    return !!(
+      (window.VolmerraSupabase || window.VOLMERRA_SUPABASE) &&
+      "serviceWorker" in navigator &&
+      "PushManager" in window &&
+      "Notification" in window
+    );
+  }
+
+  function pushInviteKeyToBase64(buffer) {
+    var bytes = new Uint8Array(buffer);
+    var bin = "";
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  function pushInviteBase64UrlToBytes(str) {
+    var b64 = str.replace(/-/g, "+").replace(/_/g, "/");
+    while (b64.length % 4) b64 += "=";
+    var bin = atob(b64);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
+  function dismissPushInvite() {
+    var banner = document.getElementById("push-invite");
+    if (banner) banner.hidden = true;
+    try {
+      localStorage.setItem(PUSH_INVITE_KEY, "1");
+    } catch (e) {}
+  }
+
+  function initPushInvite() {
+    var banner = document.getElementById("push-invite");
+    if (!banner) return;
+    var textEl = document.getElementById("push-invite-text");
+    var enableBtn = document.getElementById("push-invite-enable");
+    var closeBtn = document.getElementById("push-invite-close");
+
+    try {
+      if (localStorage.getItem(PUSH_INVITE_KEY) === "1") return;
+    } catch (e) {}
+
+    /* Sadece girişli okuyucuya göster — istek bu yöndeydi. */
+    var user = window.VolmerraAuth.currentUser();
+    if (!user) return;
+
+    if (window.Notification && Notification.permission === "denied") return;
+
+    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    var standalone =
+      (window.matchMedia &&
+        window.matchMedia("(display-mode: standalone)").matches) ||
+      navigator.standalone === true;
+
+    if (isIOS && !standalone) {
+      /* İzin ancak Ana Ekrandan açılınca verilebiliyor: yönlendir. */
+      textEl.innerHTML =
+        "<strong>Telefon bildirimleri için bir adım kaldı.</strong> " +
+        "iPhone'da bildirim ancak siteyi Safari'den Paylaş → Ana Ekrana Ekle ile ekleyip oradan açınca verilebiliyor.";
+      enableBtn.textContent = "Bildirim ayarlarına git";
+      enableBtn.addEventListener("click", function () {
+        window.location.href = "pages/settings.html";
+      });
+      closeBtn.addEventListener("click", dismissPushInvite);
+      banner.hidden = false;
+      return;
+    }
+
+    if (!pushInviteSupported()) return;
+
+    /* Zaten abone ise gösterme. */
+    navigator.serviceWorker.ready
+      .then(function (reg) {
+        return reg.pushManager.getSubscription();
+      })
+      .then(function (sub) {
+        if (sub) return;
+        banner.hidden = false;
+      })
+      .catch(function () {});
+
+    enableBtn.addEventListener("click", function () {
+      var sup = window.VolmerraSupabase || window.VOLMERRA_SUPABASE;
+      if (!sup) return;
+      enableBtn.disabled = true;
+      var freshUser = window.VolmerraAuth.currentUser();
+      if (!freshUser) return;
+      sup
+        .from("push_config")
+        .select("public_key")
+        .limit(1)
+        .maybeSingle()
+        .then(function (result) {
+          if (result.error) throw result.error;
+          var vapid = result.data && result.data.public_key;
+          if (!vapid) {
+            throw new Error(
+              "Bildirim anahtarı henüz ayarlanmamış. Yönetici Admin → Website bölümünden oluşturmalı."
+            );
+          }
+          return navigator.serviceWorker.ready.then(function (reg) {
+            return reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: pushInviteBase64UrlToBytes(vapid),
+            });
+          });
+        })
+        .then(function (sub) {
+          return sup
+            .from("push_subscriptions")
+            .upsert({
+              user_id: freshUser.id,
+              endpoint: sub.endpoint,
+              p256dh: pushInviteKeyToBase64(sub.getKey("p256dh")),
+              auth: pushInviteKeyToBase64(sub.getKey("auth")),
+              user_agent: navigator.userAgent.slice(0, 200),
+            })
+            .then(function (result) {
+              if (result.error) throw result.error;
+            });
+        })
+        .then(function () {
+          textEl.innerHTML =
+            "<strong>Hazır!</strong> Yeni bölüm yayınlandığında telefonuna bildirim düşecek.";
+          enableBtn.hidden = true;
+          window.setTimeout(function () {
+            banner.hidden = true;
+          }, 3500);
+        })
+        .catch(function (error) {
+          enableBtn.disabled = false;
+          textEl.innerHTML =
+            "<strong>Bildirim açılamadı.</strong> " +
+            ((error && error.message) ||
+              "Ayarlar sayfasından tekrar deneyebilirsin.");
+        });
+    });
+
+    closeBtn.addEventListener("click", dismissPushInvite);
+  }
+
+  document.addEventListener("volmerra:auth-ready", initPushInvite);
+  window.VolmerraAuth.whenReady(initPushInvite);
+
+  /* ============================================================
      Cinematic countdown hero
      ------------------------------------------------------------
      Reads the real scheduled publication date from the chapter
