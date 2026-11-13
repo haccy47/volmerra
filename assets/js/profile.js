@@ -53,8 +53,8 @@
     var joined = document.getElementById("profile-joined");
     if (joined && profile.joinedAt) {
       joined.textContent =
-        "Volmerra'ya katıldı — " +
-        new Date(profile.joinedAt).toLocaleDateString(undefined, {
+        "Joined Volmerra — " +
+        new Date(profile.joinedAt).toLocaleDateString("en-GB", {
           year: "numeric",
           month: "long",
           day: "numeric",
@@ -65,7 +65,7 @@
     if (bio) {
       bio.textContent = profile.bio
         ? profile.bio
-        : "Bu okuyucu henüz kendini tanıtmış değil.";
+        : "This reader hasn't written a bio yet.";
     }
 
     card.hidden = false;
@@ -75,7 +75,7 @@
     var params = new URLSearchParams(window.location.search);
     var id = params.get("id");
     if (!id) {
-      showError("Profil bulunamadı.");
+      showError("Profile not found.");
       return;
     }
 
@@ -84,13 +84,13 @@
       window.VolmerraAuth.profileOf(id)
         .then(function (profile) {
           if (!profile) {
-            showError("Bu profil bulunamadı veya kaldırılmış.");
+            showError("This profile doesn't exist or has been removed.");
             return;
           }
           render(profile);
         })
         .catch(function () {
-          showError("Profil yüklenirken bir sorun oldu. Sayfayı yenileyip tekrar dene.");
+          showError("Something went wrong while loading this profile. Refresh and try again.");
         });
     });
   });

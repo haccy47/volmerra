@@ -162,7 +162,7 @@
     });
     function markCompleted() {
       completeBtn.disabled = true;
-      completeBtn.textContent = "Tamamlandı";
+      completeBtn.textContent = "Completed";
       completeBtn.classList.add("is-done");
     }
     if (alreadyDone) markCompleted();

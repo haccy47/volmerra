@@ -28,7 +28,7 @@
   }
 
   function formatDate(iso) {
-    return new Date(iso).toLocaleDateString(undefined, {
+    return new Date(iso).toLocaleDateString("en-GB", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -115,7 +115,7 @@
     saveBtn.innerHTML =
       icon("bookmark") +
       "<span>" +
-      (saved ? "Kaydedildi" : "Kaydet") +
+      (saved ? "Saved" : "Save") +
       "</span>";
     saveBtn.addEventListener("click", function () {
       if (!user()) {
@@ -136,7 +136,7 @@
       "button",
       "btn btn--ghost btn--sm action-btn action-btn--favorite" +
         (fav ? " is-active" : ""),
-      fav ? "Favorilerde" : "Favori"
+      fav ? "In Favorites" : "Favorite"
     );
     favBtn.type = "button";
     favBtn.setAttribute("aria-pressed", String(!!fav));

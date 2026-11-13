@@ -371,6 +371,104 @@
     });
   }
 
+  /* ---------- Featured story — real data, not a placeholder ----------
+     Pulls the newest published chapter (cover, title, description,
+     season) into the featured section. Keeps the placeholder only
+     when no published chapter exists. */
+  function renderFeaturedStory() {
+    var media = document.getElementById("featured-media");
+    var body = document.getElementById("featured-body");
+    if (!media || !body || !window.VolmerraChapters) return;
+
+    window.VolmerraChapters.published().then(function (chapters) {
+      var latest = chapters
+        .slice()
+        .sort(function (a, b) {
+          return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
+        })[0];
+      if (!latest) return; /* keep the quiet placeholder state */
+
+      media.innerHTML = "";
+      body.innerHTML = "";
+
+      if (latest.cover) {
+        var img = el("img", "featured-img");
+        img.src = latest.cover;
+        img.alt = "Cover of " + latest.number;
+        media.appendChild(img);
+      } else {
+        var art = el("div", "hero-art-tile featured-art-fallback");
+        art.setAttribute("aria-hidden", "true");
+        art.appendChild(el("span", "hero-art-wordmark", "VOLMERRA"));
+        art.appendChild(
+          el("span", "hero-art-caption", "The story begins in Season One")
+        );
+        media.appendChild(art);
+      }
+
+      if (latest.number) {
+        var badge = el("span", "badge", latest.number);
+        body.appendChild(badge);
+      }
+      body.appendChild(el("h3", null, latest.title || "Untitled chapter"));
+      if (latest.description) {
+        body.appendChild(el("p", "card-text", latest.description));
+      }
+      var cta = el(
+        "a",
+        "btn btn--primary",
+        latest.content ? "Start Reading" : "View the chapter"
+      );
+      cta.href = latest.content
+        ? "pages/read.html?id=" + encodeURIComponent(latest.id)
+        : "pages/chapter.html?id=" + encodeURIComponent(latest.id);
+      body.appendChild(cta);
+    });
+  }
+
+  /* ---------- Character highlights — real data only ----------
+     Shows real published character portraits from the CMS. The
+     section stays hidden when no character has a portrait for the
+     current published season — no fake cards. */
+  function renderCharacterHighlights() {
+    var section = document.getElementById("character-highlights");
+    var mount = document.getElementById("character-highlights-mount");
+    if (!section || !mount || !window.VolmerraCMS) return;
+
+    var currentSeason =
+      (window.VolmerraSeasons && window.VolmerraSeasons.latestPublished()) ||
+      "s1";
+
+    window.VolmerraCMS.list("characters").then(function (characters) {
+      var visible = characters.filter(function (item) {
+        return window.VolmerraCMS.portraitFor(item, currentSeason);
+      });
+      mount.innerHTML = "";
+      if (!visible.length) {
+        section.hidden = true;
+        return;
+      }
+
+      visible.forEach(function (item) {
+        var card = el("a", "card character-card");
+        card.href =
+          "pages/character.html?id=" + encodeURIComponent(item.id);
+        var portrait = window.VolmerraCMS.portraitFor(item, currentSeason);
+        var media = el("div", "character-card-media");
+        var img = document.createElement("img");
+        img.src = portrait;
+        img.alt = "Portrait of " + (item.name || "character");
+        img.loading = "lazy";
+        media.appendChild(img);
+        card.appendChild(media);
+        card.appendChild(el("h3", "character-card-name", item.name || "(unnamed)"));
+        mount.appendChild(card);
+      });
+
+      section.hidden = false;
+    });
+  }
+
   function el(tag, className, text) {
     var node = document.createElement(tag);
     if (className) node.className = className;
@@ -394,8 +492,15 @@
     }
 
     renderChapterGallery();
-    renderLatestChapter();
-    initHero();
+    renderFeaturedStory();
+    renderCharacterHighlights();
+    if (!window.VOLMERRA_BACKEND_CONFIGURED) {
+      /* On the localStorage fallback the first render is the final
+         render; with the real backend, auth-ready re-renders instead
+         (avoids the stale-data flash). */
+      renderLatestChapter();
+      initHero();
+    }
   });
 
   /* Live refresh for the real backend (Supabase adapter): when the
@@ -422,6 +527,8 @@
        may have used the localStorage fallback (stale or empty).
        Re-render everything data-driven once the backend is live. */
     renderChapterGallery();
+    renderFeaturedStory();
+    renderCharacterHighlights();
     renderLatestChapter();
     initHero();
   });
@@ -518,9 +625,9 @@
     if (isIOS && !standalone) {
       /* İzin ancak Ana Ekrandan açılınca verilebiliyor: yönlendir. */
       textEl.innerHTML =
-        "<strong>Telefon bildirimleri için bir adım kaldı.</strong> " +
-        "iPhone'da bildirim ancak siteyi Safari'den Paylaş → Ana Ekrana Ekle ile ekleyip oradan açınca verilebiliyor.";
-      enableBtn.textContent = "Bildirim ayarlarına git";
+        "<strong>Stay in the loop.</strong> " +
+        "Get a notification on your phone whenever a new chapter is published.";
+      enableBtn.textContent = "Enable notifications";
       enableBtn.addEventListener("click", function () {
         window.location.href = "pages/settings.html";
       });
@@ -558,7 +665,7 @@
           var vapid = result.data && result.data.public_key;
           if (!vapid) {
             throw new Error(
-              "Bildirim anahtarı henüz ayarlanmamış. Yönetici Admin → Website bölümünden oluşturmalı."
+              "The notification key is not set up yet. The site owner must create it in Admin → Website."
             );
           }
           return navigator.serviceWorker.ready.then(function (reg) {
@@ -584,7 +691,7 @@
         })
         .then(function () {
           textEl.innerHTML =
-            "<strong>Hazır!</strong> Yeni bölüm yayınlandığında telefonuna bildirim düşecek.";
+            "<strong>You're all set!</strong> New chapters will land on your phone as notifications.";
           enableBtn.hidden = true;
           /* Onay mesajı kısa görünür, sonra panel aşağı kayarak çıkar. */
           window.setTimeout(function () {
@@ -599,9 +706,9 @@
         .catch(function (error) {
           enableBtn.disabled = false;
           textEl.innerHTML =
-            "<strong>Bildirim açılamadı.</strong> " +
+            "<strong>Couldn't enable notifications.</strong> " +
             ((error && error.message) ||
-              "Ayarlar sayfasından tekrar deneyebilirsin.");
+              "You can try again from Account Settings.");
         });
     });
 
@@ -712,7 +819,7 @@
       " · Season " +
       chapter.season.toUpperCase() +
       " · " +
-      new Date(chapter.scheduledAt).toLocaleString(undefined, {
+      new Date(chapter.scheduledAt).toLocaleString("en-GB", {
         dateStyle: "medium",
         timeStyle: "short",
       });
@@ -781,7 +888,7 @@
       chapter.season.toUpperCase() +
       (chapter.publishedAt
         ? " · " +
-          new Date(chapter.publishedAt).toLocaleDateString(undefined, {
+          new Date(chapter.publishedAt).toLocaleDateString("en-GB", {
             dateStyle: "medium",
           })
         : "");
@@ -800,7 +907,7 @@
       "Season " +
       chapter.season.toUpperCase() +
       " · " +
-      new Date(chapter.scheduledAt).toLocaleString(undefined, {
+      new Date(chapter.scheduledAt).toLocaleString("en-GB", {
         dateStyle: "medium",
         timeStyle: "short",
       });

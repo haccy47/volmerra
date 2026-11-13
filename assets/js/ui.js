@@ -175,7 +175,7 @@
         '<span class="notif-item-title">' + escapeHtml(n.title) + "</span>" +
         (n.body ? '<span class="notif-item-body">' + escapeHtml(n.body) + "</span>" : "") +
         '<span class="notif-item-date">' +
-        new Date(n.at).toLocaleDateString(undefined, {
+        new Date(n.at).toLocaleDateString("en-GB", {
           month: "short",
           day: "numeric",
         }) +

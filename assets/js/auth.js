@@ -497,6 +497,16 @@
      copy of the code or a wrong copy of the site. */
   function updateDbBadge() {
     if (!window.VOLMERRA_BACKEND_CONFIGURED) return;
+    /* Debug görünümü: sadece yönetici oturumlarında gösterilir. */
+    if (
+      !window.VolmerraAuth ||
+      typeof window.VolmerraAuth.isAdmin !== "function" ||
+      !window.VolmerraAuth.isAdmin()
+    ) {
+      var stale = document.getElementById("volmerra-db-badge");
+      if (stale) stale.remove();
+      return;
+    }
     var badge = document.getElementById("volmerra-db-badge");
     if (!badge) {
       if (!document.body) return;

@@ -16,7 +16,7 @@
 
   function formatDate(iso) {
     if (!iso) return "";
-    return new Date(iso).toLocaleDateString(undefined, {
+    return new Date(iso).toLocaleDateString("en-GB", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -57,7 +57,7 @@
         }
 
         groups.forEach(function (group) {
-          var head = el("div", "section-head");
+          var head = el("div", "section-head is-visible");
           var titles = el("div");
           titles.appendChild(
             el("p", "eyebrow", "Season " + group.season.toUpperCase())
@@ -104,7 +104,7 @@
     }
 
     publishDue();
-    loadChapters();
+    if (!window.VOLMERRA_BACKEND_CONFIGURED) loadChapters();
     window.setInterval(publishDue, 60000);
 
     /* The backend adapter attaches asynchronously — the first render

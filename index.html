@@ -25,20 +25,20 @@
         <div class="cinema-hero-media" id="countdown-media"></div>
         <div class="cinema-hero-overlay"></div>
         <div class="cinema-hero-info">
-          <p class="hero-countdown-label">YENİ BÖLÜM YAKINDA</p>
+          <p class="hero-countdown-label">NEW CHAPTER COMING SOON</p>
           <h1 class="cinema-hero-title" id="countdown-title"></h1>
           <p class="cinema-hero-desc" id="countdown-meta"></p>
-          <div class="countdown" id="countdown-timer" role="timer" aria-label="Yayına kalan süre">
-            <div class="count-unit"><span class="count-value" id="cd-days">00</span><span class="count-label">GÜN</span></div>
+          <div class="countdown" id="countdown-timer" role="timer" aria-label="Time until release">
+            <div class="count-unit"><span class="count-value" id="cd-days">00</span><span class="count-label">DAYS</span></div>
             <span class="count-sep">:</span>
-            <div class="count-unit"><span class="count-value" id="cd-hours">00</span><span class="count-label">SAAT</span></div>
+            <div class="count-unit"><span class="count-value" id="cd-hours">00</span><span class="count-label">HOURS</span></div>
             <span class="count-sep">:</span>
-            <div class="count-unit"><span class="count-value" id="cd-minutes">00</span><span class="count-label">DAKİKA</span></div>
+            <div class="count-unit"><span class="count-value" id="cd-minutes">00</span><span class="count-label">MIN</span></div>
             <span class="count-sep">:</span>
-            <div class="count-unit"><span class="count-value" id="cd-seconds">00</span><span class="count-label">SANİYE</span></div>
+            <div class="count-unit"><span class="count-value" id="cd-seconds">00</span><span class="count-label">SEC</span></div>
           </div>
           <div class="hero-countdown-cta">
-            <a class="btn btn--ghost" href="pages/story.html">Bölümleri Gör</a>
+            <a class="btn btn--ghost" href="pages/story.html">View chapters</a>
           </div>
         </div>
       </div>
@@ -50,11 +50,11 @@
         <div class="cinema-hero-media" id="feature-media"></div>
         <div class="cinema-hero-overlay"></div>
         <div class="cinema-hero-info">
-          <p class="hero-countdown-label">YENİ BÖLÜM</p>
+          <p class="hero-countdown-label">NEW CHAPTER</p>
           <h1 class="cinema-hero-title" id="feature-title"></h1>
           <p class="cinema-hero-desc" id="feature-meta"></p>
           <div class="hero-feature-actions">
-            <a class="btn btn--primary btn--cta" id="feature-cta" href="#">Okumaya Başla</a>
+            <a class="btn btn--primary btn--cta" id="feature-cta" href="#">Start Reading</a>
           </div>
         </div>
       </div>
@@ -64,37 +64,23 @@
     <section id="hero-upcoming" hidden>
       <div class="container">
         <div class="card hero-upcoming-card">
-          <span class="badge">YENİ BÖLÜM YAKINDA</span>
+          <span class="badge">NEW CHAPTER COMING SOON</span>
           <div class="hero-upcoming-body">
             <div>
               <p class="row-title" id="upcoming-title"></p>
               <p class="row-meta" id="upcoming-meta"></p>
             </div>
-            <div class="countdown countdown--strip" id="upcoming-timer" role="timer" aria-label="Yayına kalan süre">
-              <div class="count-unit"><span class="count-value" id="up-days">00</span><span class="count-label">GÜN</span></div>
+            <div class="countdown countdown--strip" id="upcoming-timer" role="timer" aria-label="Time until release">
+              <div class="count-unit"><span class="count-value" id="up-days">00</span><span class="count-label">DAYS</span></div>
               <span class="count-sep">:</span>
-              <div class="count-unit"><span class="count-value" id="up-hours">00</span><span class="count-label">SAAT</span></div>
+              <div class="count-unit"><span class="count-value" id="up-hours">00</span><span class="count-label">HOURS</span></div>
               <span class="count-sep">:</span>
-              <div class="count-unit"><span class="count-value" id="up-minutes">00</span><span class="count-label">DAKİKA</span></div>
+              <div class="count-unit"><span class="count-value" id="up-minutes">00</span><span class="count-label">MIN</span></div>
               <span class="count-sep">:</span>
-              <div class="count-unit"><span class="count-value" id="up-seconds">00</span><span class="count-label">SANİYE</span></div>
+              <div class="count-unit"><span class="count-value" id="up-seconds">00</span><span class="count-label">SEC</span></div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- SON YAYINLANAN BÖLÜM — latest published chapter, kept separate
-         from the gallery; updates automatically on every publication -->
-    <section id="latest-chapter" hidden>
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">SON YAYINLANAN BÖLÜM</p>
-            <h2>Latest chapter</h2>
-          </div>
-        </div>
-        <div id="latest-chapter-body"></div>
       </div>
     </section>
 
@@ -166,10 +152,8 @@
             </div>
           </div>
           <div class="featured">
-            <div class="featured-media">
-              <div class="placeholder placeholder--media">Featured artwork placeholder — no official artwork provided yet</div>
-            </div>
-            <div class="featured-body">
+            <div class="featured-media" id="featured-media"></div>
+            <div class="featured-body" id="featured-body">
               <span class="badge">Placeholder</span>
               <h3>The featured story will appear here</h3>
               <p class="card-text">
@@ -231,7 +215,7 @@
             <span class="season-card" style="--s-accent:#9aa0a6; --s-accent-ink:#131416; opacity:0.55; cursor:default;" aria-disabled="true">
               <span class="season-card-swatch"></span>
               <span class="season-card-code">S8</span>
-              <span class="season-card-label">Season Eight — yakında</span>
+              <span class="season-card-label">Season Eight — coming soon</span>
             </span>
           </div>
         </div>
@@ -251,8 +235,9 @@
         </div>
       </section>
 
-      <!-- Character highlights -->
-      <section class="section">
+      <!-- Character highlights — shown only when real character
+           data exists; rendered by home.js -->
+      <section class="section" id="character-highlights" hidden>
         <div class="container">
           <div class="section-head">
             <div>
@@ -261,23 +246,7 @@
             </div>
             <a class="head-link" href="pages/characters.html">All characters</a>
           </div>
-          <div class="grid-3">
-            <div class="card character-card">
-              <div class="placeholder placeholder--square">Portrait placeholder</div>
-              <h3>Character profile</h3>
-              <p class="card-meta">Placeholder — no official character material provided yet</p>
-            </div>
-            <div class="card character-card">
-              <div class="placeholder placeholder--square">Portrait placeholder</div>
-              <h3>Character profile</h3>
-              <p class="card-meta">Placeholder — no official character material provided yet</p>
-            </div>
-            <div class="card character-card">
-              <div class="placeholder placeholder--square">Portrait placeholder</div>
-              <h3>Character profile</h3>
-              <p class="card-meta">Placeholder — no official character material provided yet</p>
-            </div>
-          </div>
+          <div class="grid-3" id="character-highlights-mount"></div>
         </div>
       </section>
 

@@ -2636,3 +2636,51 @@ a.season-card:hover {
   line-height: 1.85;
   letter-spacing: 0.002em;
 }
+
+
+/* ============================================================
+   RESPONSIVE GUARDS + DESIGNED FALLBACKS
+   ============================================================ */
+
+/* The mobile bottom navigation belongs to the phone experience
+   only. Without this guard it leaks onto desktop as an unstyled
+   block of giant icons below the footer. */
+.mobile-bottom-nav-wrap {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .mobile-bottom-nav-wrap {
+    display: block;
+  }
+}
+
+/* Mobile-only header icons must never appear on desktop. */
+@media (min-width: 641px) {
+  .header-mobile-actions,
+  .header-only-mobile {
+    display: none !important;
+  }
+}
+
+/* ---------- Cinema hero fallback — designed, not broken ----------
+   A chapter without cover art gets a deliberate tonal panel with a
+   readable wordmark instead of an almost-invisible watermark. */
+.cinema-hero-media--empty {
+  background:
+    radial-gradient(
+      90% 130% at 75% 15%,
+      color-mix(in srgb, var(--season-accent) 22%, transparent) 0%,
+      transparent 55%
+    ),
+    linear-gradient(155deg, #1a1d26 0%, #12141a 55%, #0b0c10 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.cinema-hero-media--empty span,
+.cinema-hero-media--empty .cinema-hero-wordmark {
+  color: var(--text);
+  opacity: 0.6;
+  font-family: var(--font-display);
+  letter-spacing: 0.3em;
+}
