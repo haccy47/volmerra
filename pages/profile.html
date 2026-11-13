@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reader profile — VOLMERRA</title>
+  <meta name="description" content="A reader profile of the VOLMERRA community.">
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/theme.js?v=2"></script>
+  <script src="../assets/js/seasons.js?v=2"></script>
+  <script src="../assets/js/season.js?v=2"></script>
+</head>
+<body data-page="profile">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="site-header"></div>
+
+  <main id="main">
+    <section id="reader-profile-section">
+      <div class="container page-hero">
+        <a class="head-link" href="story.html">&larr; Back to Story</a>
+        <p class="eyebrow">Reader</p>
+      </div>
+
+      <section class="section section--tight" style="padding-top: 0;">
+        <div class="container">
+
+          <div class="reader-profile" id="reader-profile" hidden>
+            <div class="reader-profile-avatar" id="profile-avatar"></div>
+            <div class="reader-profile-info">
+              <h1 id="profile-name"></h1>
+              <p class="reader-profile-meta">
+                <span class="badge badge--published" id="profile-badge" hidden>Admin</span>
+                <span id="profile-joined"></span>
+              </p>
+              <p class="reader-profile-bio" id="profile-bio"></p>
+            </div>
+          </div>
+
+          <div class="empty-state" id="profile-error" hidden>
+            <div id="profile-error-text"></div>
+            <p class="content-note" style="text-align: center;">
+              <a href="story.html" style="text-decoration: underline;">Back to Story</a>
+            </p>
+          </div>
+
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../assets/js/auth.js?v=5"></script>
+  <script src="../assets/js/store.js?v=2"></script>
+  <script src="../assets/js/chapters.js?v=2"></script>
+  <script src="../assets/js/cms.js?v=2"></script>
+  <script src="../assets/js/search.js?v=2"></script>
+  <script src="../assets/js/notifications.js?v=2"></script>
+  <script src="../assets/js/ui.js?v=2"></script>
+  <script src="../assets/js/profile.js?v=2"></script>
+</body>
+</html>

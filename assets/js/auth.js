@@ -336,6 +336,23 @@
         })
       );
     },
+
+    /* Public-safe profile of any account registered in THIS browser
+       (fallback build). On the real backend this comes from the
+       public_profile() RPC instead. Never exposes hashes/emails. */
+    profileOf: function (userId) {
+      var u = readUsers().find(function (x) {
+        return x.id === userId;
+      });
+      if (!u) return Promise.resolve(null);
+      return Promise.resolve({
+        displayName: u.displayName,
+        avatar: u.avatar || null,
+        bio: "",
+        isAdmin: !!u.isAdmin,
+        joinedAt: u.createdAt,
+      });
+    },
   };
 
   var backend = localStorageBackend;
@@ -464,6 +481,12 @@
 
     listUsers: function () {
       return backend.listUsers();
+    },
+
+    /* Public-safe profile of any account (see supabase.js profileOf
+       and the localStorage fallback above). */
+    profileOf: function (userId) {
+      return backend.profileOf(userId);
     },
   };
 

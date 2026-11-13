@@ -155,6 +155,32 @@ create policy "profiles: admins manage every profile"
   using (public.is_admin())
   with check (public.is_admin());
 
+-- Public-safe profile lookup for the "view someone's profile"
+-- feature: anyone (even guests) may fetch a profile's display
+-- name, avatar, bio, admin badge and join date. The email column
+-- is deliberately NOT exposed — profiles still allow "read own
+-- or admins" only, so the raw rows (with emails) stay private.
+create or replace function public.public_profile(p_id uuid)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select jsonb_build_object(
+    'displayName', p.display_name,
+    'avatar',      p.avatar,
+    'bio',         p.bio,
+    'isAdmin',     p.is_admin,
+    'joinedAt',    p.created_at
+  )
+  from public.profiles p
+  where p.id = p_id;
+$$;
+
+revoke all on function public.public_profile(uuid) from public;
+grant execute on function public.public_profile(uuid) to anon, authenticated;
+
 -- ------------------------------------------------------------
 -- 3) site_state — chapters + CMS document store
 -- ------------------------------------------------------------

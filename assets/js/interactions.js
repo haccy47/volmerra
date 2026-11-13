@@ -268,7 +268,13 @@
     var main = el("div", "comment-main");
 
     var head = el("div", "comment-head");
-    head.appendChild(el("span", "comment-author", c.authorName));
+    /* Yazar adı = profil sayfasına bağlantı: tıklayınca o okuyucunun
+       herkese açık profili açılır. */
+    var authorLink = document.createElement("a");
+    authorLink.className = "comment-author";
+    authorLink.href = "../pages/profile.html?id=" + encodeURIComponent(c.userId || "");
+    authorLink.textContent = c.authorName;
+    head.appendChild(authorLink);
     var date = el(
       "span",
       "comment-date",

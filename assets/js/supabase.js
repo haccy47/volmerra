@@ -273,6 +273,18 @@
           });
         });
     },
+
+    /* Public-safe profile of ANY account (for "view profile" links):
+       display name, avatar, bio, admin badge and join date — served
+       by the public_profile() RPC, which never exposes the email. */
+    profileOf: function (userId) {
+      return client
+        .rpc("public_profile", { p_id: userId })
+        .then(function (result) {
+          if (result.error) throw result.error;
+          return result.data || null;
+        });
+    },
   };
 
   /* ---------- chapters & CMS: `site_state` document adapter ----------
