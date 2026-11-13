@@ -205,7 +205,7 @@
 
   function formatLibraryDate(iso) {
     if (!iso) return "—";
-    return new Date(iso).toLocaleDateString(undefined, {
+    return new Date(iso).toLocaleDateString("en-GB", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -374,7 +374,13 @@
   /* ---------- Featured story — real data, not a placeholder ----------
      Pulls the newest published chapter (cover, title, description,
      season) into the featured section. Keeps the placeholder only
-     when no published chapter exists. */
+     when no published chapter exists.
+     heroChapterId / featuredChapterId: the two presenters (cinema
+     hero and featured card) compare notes so the same chapter is
+     never shown twice on one page. */
+  var heroChapterId = null;
+  var featuredChapterId = null;
+
   function renderFeaturedStory() {
     var media = document.getElementById("featured-media");
     var body = document.getElementById("featured-body");
@@ -387,6 +393,17 @@
           return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
         })[0];
       if (!latest) return; /* keep the quiet placeholder state */
+
+      /* Hero this same newest chapter already on display? Then the
+         featured card would be a pure duplicate — hide the section
+         until the hero moves to a different chapter. */
+      var fSection = media.closest("section");
+      if (heroChapterId === latest.id) {
+        if (fSection) fSection.hidden = true;
+        return;
+      }
+      if (fSection) fSection.hidden = false;
+      featuredChapterId = latest.id;
 
       media.innerHTML = "";
       body.innerHTML = "";
@@ -898,6 +915,15 @@
     var feature = document.getElementById("hero-feature");
     feature.hidden = false;
     document.getElementById("hero-countdown").hidden = true;
+    heroChapterId = chapter.id;
+
+    /* Mirror: featured kart bu bölümü gösteriyorsa gizle (çift
+       sunumu engeller), başka bir bölümü gösteriyorsa geri getir. */
+    var featuredMedia = document.getElementById("featured-media");
+    if (featuredMedia) {
+      var fSection = featuredMedia.closest("section");
+      if (fSection) fSection.hidden = featuredChapterId === chapter.id;
+    }
   }
 
   function renderUpcomingTeaser(chapter) {

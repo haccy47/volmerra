@@ -2684,3 +2684,21 @@ a.season-card:hover {
   font-family: var(--font-display);
   letter-spacing: 0.3em;
 }
+
+
+/* ---------- Masaüstü: mobil kontroller gizlenir ----------
+   Mobil alt navigasyon ve mobil başlık aksiyonları yalnızca dar
+   ekranlar içindir; büyük ekranda sayfaya sızmasınlar (dev ikonlar,
+   alta doğru binlerce piksel boşluk, header'dan taşan düğmeler). */
+@media (min-width: 641px) {
+  .mobile-bottom-nav-wrap {
+    display: none !important;
+  }
+  body.has-mobile-nav {
+    padding-bottom: 0 !important;
+  }
+  .header-mobile-actions,
+  .header-only-mobile {
+    display: none !important;
+  }
+}

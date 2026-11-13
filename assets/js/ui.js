@@ -563,9 +563,7 @@
       "</nav>" +
       "</div>" +
       '<div class="container footer-base">' +
-      "<p>&copy; Volmerra. All rights reserved." +
-      ' <a href="' + ROOT + 'README.md" class="footer-doc-link">Project documentation</a>' +
-      "</p>" +
+      "<p>&copy; Volmerra. All rights reserved.</p>" +
       seasonPicker +
       "</div>" +
       "</footer>";
@@ -635,7 +633,7 @@
         );
         document
           .querySelectorAll(
-            ".section-head, .featured, .member-panel, .season-card, .intro-grid, .page-hero"
+            ".featured, .member-panel, .season-card, .intro-grid, .page-hero"
           )
           .forEach(function (node) {
             revealObserver.observe(node);

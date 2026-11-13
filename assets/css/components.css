@@ -761,7 +761,10 @@ body #site-header .site-header {
 /* ---------- Editorial fade-in on scroll ----------
    JS adds .reveal-ready to <html>; without JS everything stays
    visible. Elements opt in by being in the observer list. */
-.reveal-ready .section-head,
+/* NOTE: dynamically injected .section-head nodes (e.g. the season
+   headings on the Story page) are created after this observer
+   initialises — they must never be part of the reveal system, or
+   they stay invisible and leave a blank gap. Static blocks only. */
 .reveal-ready .featured,
 .reveal-ready .member-panel,
 .reveal-ready .season-card,
@@ -772,7 +775,6 @@ body #site-header .site-header {
   transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
-.reveal-ready .section-head.is-visible,
 .reveal-ready .featured.is-visible,
 .reveal-ready .member-panel.is-visible,
 .reveal-ready .season-card.is-visible,
@@ -783,7 +785,6 @@ body #site-header .site-header {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal-ready .section-head,
   .reveal-ready .featured,
   .reveal-ready .member-panel,
   .reveal-ready .season-card,
