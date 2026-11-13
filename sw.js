@@ -56,6 +56,7 @@ self.addEventListener("fetch", function (event) {
   if (request.method !== "GET") return;
   var isAsset =
     request.url.indexOf("/assets/js/") !== -1 ||
+    request.url.indexOf("/assets/css/") !== -1 ||
     request.url.indexOf("/manifest.json") !== -1;
   var isNavigation = request.mode === "navigate";
   if (!isAsset && !isNavigation) return;

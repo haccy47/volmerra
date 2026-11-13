@@ -1,14 +1,17 @@
 /* ============================================================
    VOLMERRA — Design tokens
-   Neutral palette only. Light + dark themes.
+   Cinematic dark editorial. Neutral palette + seasonal accents.
+
+   The default (:root and "light") IS the cinematic dark look;
+   the theme toggle switches to a deeper charcoal variant
+   ([data-theme="dark"]) — the site stays dark at all times.
    ============================================================ */
 
 :root {
   /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "SF Pro Display", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-display: ui-serif, Georgia, Cambria, "Times New Roman", serif;
 
   /* Spacing scale (multiples of 4) */
   --space-1: 4px;
@@ -23,9 +26,9 @@
   --space-10: 128px;
 
   /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
   --radius-full: 999px;
 
   /* Motion */
@@ -37,62 +40,60 @@
   --header-height: 64px;
 
   /* Elevation */
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
-  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.07);
-  --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.10);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.25);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.45);
 }
 
-/* ---------- Light theme (default) ---------- */
 :root,
 [data-theme="light"] {
-  color-scheme: light;
+  color-scheme: dark;
 
-  --bg: #fafaf9;
-  --surface: #ffffff;
-  --surface-muted: #f4f4f2;
-  --text: #131416;
-  --text-muted: #6d7178;
-  --text-faint: #9a9ea4;
+  --bg: #0B0C10;
+  --surface: #12141A;
+  --surface-muted: #191B22;
+  --text: #F1F0EC;
+  --text-muted: #92939B;
+  --text-faint: #6D6F78;
 
-  --border: #e7e6e3;
-  --border-strong: #d4d3cf;
+  --border: #292B33;
+  --border-strong: #3A3D48;
 
-  --btn-primary-bg: #131416;
-  --btn-primary-text: #fafaf9;
-  --btn-primary-hover: #2b2d30;
+  --btn-primary-bg: #C5A66A;
+  --btn-primary-text: #0B0C10;
+  --btn-primary-hover: #D6BB84;
 
-  --overlay: rgb(19 20 22 / 0.4);
+  --overlay: rgb(11 12 16 / 0.6);
 
-  --shadow-sm: 0 1px 2px rgb(19 20 22 / 0.05);
-  --shadow-md: 0 8px 24px rgb(19 20 22 / 0.07);
-  --shadow-lg: 0 16px 48px rgb(19 20 22 / 0.10);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.25);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.45);
 }
 
-/* ---------- Dark theme ---------- */
+/* Deeper cinema variant (theme toggle) */
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #0c0d0e;
-  --surface: #141517;
-  --surface-muted: #1b1d1f;
-  --text: #f2f2f1;
-  --text-muted: #9aa0a6;
-  --text-faint: #62666b;
+  --bg: #08090C;
+  --surface: #0F1116;
+  --surface-muted: #191B22;
+  --text: #F1F0EC;
+  --text-muted: #92939B;
+  --text-faint: #6D6F78;
 
-  --border: #26282b;
-  --border-strong: #33363a;
+  --border: #292B33;
+  --border-strong: #3A3D48;
 
-  --btn-primary-bg: #f2f2f1;
-  --btn-primary-text: #0c0d0e;
-  --btn-primary-hover: #d9d9d7;
+  --btn-primary-bg: #C5A66A;
+  --btn-primary-text: #0B0C10;
+  --btn-primary-hover: #D6BB84;
 
-  --overlay: rgb(0 0 0 / 0.55);
+  --overlay: rgb(0 0 0 / 0.65);
 
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
-  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.40);
-  --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.50);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.6);
 }
-
 
 /* ============================================================
    Seasonal accent system
@@ -184,10 +185,9 @@
 [data-theme="dark"][data-season="s7"] {
   --season-accent: #6c87c8;
   --season-accent-hover: #8099d4;
-  --season-accent-text: #0c0d0e;
 }
 [data-theme="dark"][data-season="s8"] {
   --season-accent: #9aa0a6;
   --season-accent-hover: #b3b8bd;
-  --season-accent-text: #0c0d0e;
+  --season-accent-text: #131416;
 }

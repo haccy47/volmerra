@@ -611,5 +611,36 @@
       document.body.classList.add("has-mobile-nav");
     }
     updateNotifBadges();
+
+    /* ---------- Editorial fade-in on scroll ----------
+       Subtle, restrained: only static page blocks animate (never
+       re-rendered data cards). Fully disabled when the visitor asks
+       for reduced motion, and everything stays visible without JS. */
+    try {
+      document.documentElement.classList.add("reveal-ready");
+      var reduced =
+        window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if ("IntersectionObserver" in window && !reduced) {
+        var revealObserver = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                revealObserver.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.12 }
+        );
+        document
+          .querySelectorAll(
+            ".section-head, .featured, .member-panel, .season-card, .intro-grid, .page-hero"
+          )
+          .forEach(function (node) {
+            revealObserver.observe(node);
+          });
+      }
+    } catch (e) {}
   });
 })();

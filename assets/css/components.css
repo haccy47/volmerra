@@ -748,6 +748,53 @@ a.card:hover {
   }
 }
 
+/* ---------- Navbar — translucent cinematic bar ----------
+   "body #" specificity, so this wins over the earlier page rules
+   regardless of stylesheet order. */
+body #site-header .site-header {
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ---------- Editorial fade-in on scroll ----------
+   JS adds .reveal-ready to <html>; without JS everything stays
+   visible. Elements opt in by being in the observer list. */
+.reveal-ready .section-head,
+.reveal-ready .featured,
+.reveal-ready .member-panel,
+.reveal-ready .season-card,
+.reveal-ready .intro-grid,
+.reveal-ready .page-hero {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal-ready .section-head.is-visible,
+.reveal-ready .featured.is-visible,
+.reveal-ready .member-panel.is-visible,
+.reveal-ready .season-card.is-visible,
+.reveal-ready .intro-grid.is-visible,
+.reveal-ready .page-hero.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-ready .section-head,
+  .reveal-ready .featured,
+  .reveal-ready .member-panel,
+  .reveal-ready .season-card,
+  .reveal-ready .intro-grid,
+  .reveal-ready .page-hero {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 
 /* ---------- Reader profile page ----------
    Yorumlarda isme tıklayınca açılan herkese açık profil. */

@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0B0C10">
   <title>VOLMERRA — The official home of the story universe</title>
   <meta name="description" content="VOLMERRA is the official website of a fictional story universe. Read published chapters, explore the characters and follow the story.">
-  <link rel="stylesheet" href="assets/css/tokens.css">
-  <link rel="stylesheet" href="assets/css/base.css">
-  <link rel="stylesheet" href="assets/css/components.css">
-  <link rel="stylesheet" href="assets/css/pages.css">
+  <link rel="stylesheet" href="assets/css/tokens.css?v=3">
+  <link rel="stylesheet" href="assets/css/base.css?v=3">
+  <link rel="stylesheet" href="assets/css/components.css?v=3">
+  <link rel="stylesheet" href="assets/css/pages.css?v=3">
   <script src="assets/js/theme.js?v=2"></script>
   <script src="assets/js/seasons.js?v=2"></script>
   <script src="assets/js/season.js?v=2"></script>
@@ -102,20 +103,32 @@
          ====================================================== -->
     <section id="home-guest" hidden>
 
-      <!-- Hero -->
+      <!-- Hero — cinematic editorial split -->
       <div class="container hero">
-        <p class="eyebrow">The official website</p>
-        <h1 class="hero-title">VOLMERRA</h1>
-        <p class="hero-sub">
-          The official home of a single, continuing story universe — its chapters,
-          its characters and its world. Original content is being prepared and will
-          be published here.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn--ghost" href="pages/login.html">Log in</a>
-          <a class="btn btn--primary" href="pages/signup.html">Sign up</a>
+        <div class="hero-split">
+          <div class="hero-split-copy">
+            <p class="eyebrow">The official story universe</p>
+            <h1 class="hero-title">VOLMERRA</h1>
+            <p class="hero-sub">
+              The official home of a single, continuing story — its chapters,
+              its characters and its world, told as an original fantasy epic.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn--primary" href="pages/story.html">EXPLORE THE STORY</a>
+              <a class="btn btn--ghost" href="pages/universe.html">DISCOVER THE UNIVERSE</a>
+            </div>
+            <p class="hero-meta">
+              Free to join. <a href="pages/signup.html" style="text-decoration: underline;">Create an account</a>
+              to save progress, keep a library and join the conversation.
+            </p>
+          </div>
+          <div class="hero-split-art" aria-hidden="true">
+            <div class="hero-art-tile">
+              <span class="hero-art-wordmark">VOLMERRA</span>
+              <span class="hero-art-caption">The story begins in Season One</span>
+            </div>
+          </div>
         </div>
-        <p class="hero-meta">Free to join. Readers with an account can save progress, keep a library and join the conversation.</p>
       </div>
 
       <!-- Introduction -->
@@ -165,6 +178,61 @@
               </p>
               <a class="btn btn--ghost" href="pages/story.html">Visit the Story section</a>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEASONS — cinematic season selector -->
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Seasons</p>
+              <h2>The seasons of Volmerra</h2>
+            </div>
+            <a class="head-link" href="pages/story.html">All chapters</a>
+          </div>
+          <div class="season-grid">
+            <a class="season-card" style="--s-accent:#e4bc54; --s-accent-ink:#131416;" href="pages/story.html">
+              <span class="season-card-swatch"></span>
+              <span class="season-card-code">S1</span>
+              <span class="season-card-label">Season One</span>
+            </a>
+            <a class="season-card" style="--s-accent:#9b5fa8; --s-accent-ink:#0c0d0e;" href="pages/story.html">
+              <span class="season-card-swatch"></span>
+              <span class="season-card-code">S2</span>
+              <span class="season-card-label">Season Two</span>
+            </a>
+            <a class="season-card" style="--s-accent:#a5dceb; --s-accent-ink:#131416;" href="pages/story.html">
+              <span class="season-card-swatch"></span>
+              <span class="season-card-code">S3</span>
+              <span class="season-card-label">Season Three</span>
+            </a>
+            <a class="season-card" style="--s-accent:#e0454e; --s-accent-ink:#ffffff;" href="pages/story.html">
+              <span class="season-card-swatch"></span>
+              <span class="season-card-code">S4</span>
+              <span class="season-card-label">Season Four</span>
+            </a>
+            <a class="season-card" style="--s-accent:#20bfd0; --s-accent-ink:#0c0d0e;" href="pages/story.html">
+              <span class="season-card-swatch"></span>
+              <span class="season-card-code">S5</span>
+              <span class="season-card-label">Season Five</span>
+            </a>
+            <a class="season-card" style="--s-accent:#d9b25c; --s-accent-ink:#131416;" href="pages/story.html">
+              <span class="season-card-swatch"></span>
+              <span class="season-card-code">S6</span>
+              <span class="season-card-label">Season Six</span>
+            </a>
+            <a class="season-card" style="--s-accent:#6c87c8; --s-accent-ink:#ffffff;" href="pages/story.html">
+              <span class="season-card-swatch"></span>
+              <span class="season-card-code">S7</span>
+              <span class="season-card-label">Season Seven</span>
+            </a>
+            <span class="season-card" style="--s-accent:#9aa0a6; --s-accent-ink:#131416; opacity:0.55; cursor:default;" aria-disabled="true">
+              <span class="season-card-swatch"></span>
+              <span class="season-card-code">S8</span>
+              <span class="season-card-label">Season Eight — yakında</span>
+            </span>
           </div>
         </div>
       </section>

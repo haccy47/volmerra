@@ -4,8 +4,8 @@
   "description": "VOLMERRA evreninin resmi sitesi — bölümler, karakterler ve dünya.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#101010",
-  "theme_color": "#101010",
+  "background_color": "#0B0C10",
+  "theme_color": "#0B0C10",
   "icons": [
     {
       "src": "/icon.svg",

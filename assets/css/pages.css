@@ -2447,3 +2447,192 @@ img.portrait-thumb {
     max-height: 60vh;
   }
 }
+
+
+/* ============================================================
+   CINEMATIC DARK EDITORIAL — home hero split, seasons, reader
+   ============================================================ */
+
+/* ---------- Hero — editorial split ---------- */
+.hero-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(32px, 6vw, 72px);
+  align-items: center;
+  min-height: min(68vh, 640px);
+  text-align: left;
+}
+
+.hero-split .hero-title {
+  font-size: clamp(3rem, 7.5vw, 5.25rem);
+  letter-spacing: 0.05em;
+}
+
+.hero-split .hero-sub,
+.hero-split .hero-meta {
+  max-width: 520px;
+  margin-inline: 0;
+}
+
+.hero-split .hero-sub {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+}
+
+.hero-split .hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.hero-split .hero-meta a {
+  color: var(--season-accent);
+}
+
+.hero-split-art {
+  align-self: stretch;
+}
+
+.hero-art-tile {
+  position: relative;
+  height: 100%;
+  min-height: 340px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background:
+    radial-gradient(
+      120% 140% at 70% 20%,
+      color-mix(in srgb, var(--season-accent) 16%, transparent) 0%,
+      transparent 60%
+    ),
+    linear-gradient(160deg, #161822 0%, #0e1016 45%, #0b0c10 100%);
+  border: 1px solid color-mix(in srgb, var(--season-accent) 20%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--season-accent) 16%, transparent);
+}
+
+.hero-art-wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  letter-spacing: 0.32em;
+  color: var(--text);
+  opacity: 0.92;
+}
+
+.hero-art-caption {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Mobile: stack vertically — artwork becomes a shorter band below. */
+@media (max-width: 860px) {
+  .hero-split {
+    grid-template-columns: 1fr;
+    text-align: center;
+    min-height: 0;
+    padding-top: clamp(56px, 10vh, 96px);
+  }
+  .hero-split .hero-sub,
+  .hero-split .hero-meta {
+    margin-inline: auto;
+  }
+  .hero-split .hero-actions {
+    justify-content: center;
+  }
+  .hero-split-art {
+    order: 2;
+    height: 240px;
+    margin-top: 36px;
+  }
+  .hero-art-tile {
+    height: 100%;
+    min-height: 240px;
+  }
+}
+
+/* ---------- Seasons — visual season selector ---------- */
+.season-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.season-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: transform 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.season-card-swatch {
+  height: 110px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background:
+    radial-gradient(
+      120% 120% at 30% 25%,
+      color-mix(in srgb, var(--s-accent) 85%, #0b0c10 15%) 0%,
+      color-mix(in srgb, var(--s-accent) 25%, #0b0c10 75%) 75%,
+      #0b0c10 100%
+    );
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--s-accent) 45%, transparent);
+}
+
+.season-card-code {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--s-accent);
+  letter-spacing: 0.08em;
+}
+
+.season-card-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+a.season-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--s-accent) 55%, transparent);
+  box-shadow: var(--shadow-md);
+}
+
+/* Mobile: swipeable row instead of a squashed grid. */
+@media (max-width: 767px) {
+  .season-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    margin-inline: calc(-1 * clamp(20px, 5vw, 32px));
+    padding-inline: clamp(20px, 5vw, 32px);
+    scrollbar-width: none;
+  }
+  .season-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .season-card {
+    flex: 0 0 46%;
+    scroll-snap-align: start;
+  }
+}
+
+/* ---------- Okuma konforu — editoryal serif gövde ---------- */
+.reader-content {
+  font-family: var(--font-display);
+  line-height: 1.85;
+  letter-spacing: 0.002em;
+}
