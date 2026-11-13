@@ -416,7 +416,15 @@
       member.hidden = true;
     }
   }
-  document.addEventListener("volmerra:auth-ready", refreshHomeAuth);
+  document.addEventListener("volmerra:auth-ready", function () {
+    refreshHomeAuth();
+    /* The backend adapter attaches asynchronously — the first render
+       may have used the localStorage fallback (stale or empty).
+       Re-render everything data-driven once the backend is live. */
+    renderChapterGallery();
+    renderLatestChapter();
+    initHero();
+  });
   document.addEventListener("volmerra:library-loaded", function () {
     if (window.VolmerraAuth.currentUser()) renderMemberHome(window.VolmerraAuth.currentUser());
   });

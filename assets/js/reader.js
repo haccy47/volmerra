@@ -113,34 +113,41 @@
   document.addEventListener("DOMContentLoaded", function () {
     var params = new URLSearchParams(window.location.search);
     var id = params.get("id");
-    var admin = window.VolmerraAuth.isAdmin();
 
-    if (!id) {
-      /* Direct visit without a chapter id: fall back to the most
-         recently published chapter instead of a dead end. */
-      window.VolmerraChapters.published().then(function (chapters) {
-        if (!chapters.length) {
-          showError("No chapters have been published yet.");
-          return;
-        }
-        var latest = chapters.slice().sort(function (a, b) {
-          return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
-        })[0];
-        render(latest);
-      });
-      return;
-    }
+    /* The backend adapter attaches asynchronously: without waiting,
+       the localStorage fallback answers with stale or empty content
+       and the page freezes on it. Wait for the real backend (or the
+       timeout fallback) before loading. */
+    window.VolmerraAuth.whenReady(function () {
+      var admin = window.VolmerraAuth.isAdmin();
 
-    window.VolmerraChapters
-      .get(id, { includeDrafts: admin, all: admin })
-      .then(function (c) {
-        if (!c) {
-          showError(
-            "This chapter is not available. It may be an unpublished draft, belongs to a season that has not been released yet, or was removed."
-          );
-          return;
-        }
-        render(c);
-      });
+      if (!id) {
+        /* Direct visit without a chapter id: fall back to the most
+           recently published chapter instead of a dead end. */
+        window.VolmerraChapters.published().then(function (chapters) {
+          if (!chapters.length) {
+            showError("No chapters have been published yet.");
+            return;
+          }
+          var latest = chapters.slice().sort(function (a, b) {
+            return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
+          })[0];
+          render(latest);
+        });
+        return;
+      }
+
+      window.VolmerraChapters
+        .get(id, { includeDrafts: admin, all: admin })
+        .then(function (c) {
+          if (!c) {
+            showError(
+              "This chapter is not available. It may be an unpublished draft, belongs to a season that has not been released yet, or was removed."
+            );
+            return;
+          }
+          render(c);
+        });
+    });
   });
 })();

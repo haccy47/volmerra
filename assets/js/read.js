@@ -64,7 +64,9 @@
 
     var params = new URLSearchParams(window.location.search);
     var id = params.get("id");
-    var admin = window.VolmerraAuth.isAdmin();
+    /* isAdmin() is only meaningful once the backend session has been
+       restored — read it inside the whenReady callback below. */
+    var admin = null;
 
     function load(id) {
       window.VolmerraChapters
@@ -107,23 +109,30 @@
         });
     }
 
-    if (!id) {
-      /* Direct visit without a chapter id: open the most recently
-         published chapter instead of a dead end. */
-      window.VolmerraChapters.published().then(function (chapters) {
-        if (!chapters.length) {
-          showError("No chapters have been published yet.");
-          return;
-        }
-        var latest = chapters.slice().sort(function (a, b) {
-          return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
-        })[0];
-        load(latest.id);
-      });
-      return;
-    }
+    /* The backend adapter attaches asynchronously (config → client
+       library → adapter): without waiting, the localStorage fallback
+       answers with stale or empty content and the page freezes on it.
+       Wait for the real backend (or the timeout fallback) first. */
+    window.VolmerraAuth.whenReady(function () {
+      admin = window.VolmerraAuth.isAdmin();
+      if (!id) {
+        /* Direct visit without a chapter id: open the most recently
+           published chapter instead of a dead end. */
+        window.VolmerraChapters.published().then(function (chapters) {
+          if (!chapters.length) {
+            showError("No chapters have been published yet.");
+            return;
+          }
+          var latest = chapters.slice().sort(function (a, b) {
+            return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
+          })[0];
+          load(latest.id);
+        });
+        return;
+      }
 
-    load(id);
+      load(id);
+    });
   });
 
   function trackReading(chapter) {

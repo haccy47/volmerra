@@ -106,5 +106,13 @@
     publishDue();
     loadChapters();
     window.setInterval(publishDue, 60000);
+
+    /* The backend adapter attaches asynchronously — the first render
+       may have used the localStorage fallback (stale or empty).
+       Re-render the list once the real backend is live. */
+    document.addEventListener("volmerra:auth-ready", function () {
+      publishDue();
+      loadChapters();
+    });
   });
 })();

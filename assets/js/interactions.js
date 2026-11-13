@@ -514,21 +514,26 @@
         });
     }
 
-    if (chapterId) {
-      bind(chapterId);
-    } else {
-      /* No id in the URL: the detail and reading pages fall back to the
-         most recently published chapter — the interactions must bind to
-         that same chapter, never silently disappear. */
-      window.VolmerraChapters.published().then(function (chapters) {
-        if (!chapters.length) return;
-        var latest = chapters
-          .slice()
-          .sort(function (a, b) {
-            return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
-          })[0];
-        bind(latest.id);
-      });
-    }
+    /* The backend adapter attaches asynchronously: without waiting,
+       the localStorage fallback answers with stale or empty content.
+       Wait for the real backend (or the timeout fallback) first. */
+    window.VolmerraAuth.whenReady(function () {
+      if (chapterId) {
+        bind(chapterId);
+      } else {
+        /* No id in the URL: the detail and reading pages fall back to
+           the most recently published chapter — the interactions must
+           bind to that same chapter, never silently disappear. */
+        window.VolmerraChapters.published().then(function (chapters) {
+          if (!chapters.length) return;
+          var latest = chapters
+            .slice()
+            .sort(function (a, b) {
+              return new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0);
+            })[0];
+          bind(latest.id);
+        });
+      }
+    });
   });
 })();
