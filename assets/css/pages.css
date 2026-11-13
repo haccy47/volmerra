@@ -2414,20 +2414,36 @@ img.portrait-thumb {
   margin-top: var(--space-4);
 }
 
-/* Mobilde bildirim paneli ekrana oturur: zile göre mutlak konum
-   yerine, mobil alt navigasyonun üstünde sabit bir alt sayfa olarak
-   açılır — dar ekrandan taşmaz, ekran dışına kaybolmaz. */
+/* Bildirim paneli artık SAYFA SEVİYESİNDE tek bir kart: zilin içinde
+   değil, body'e bağlı. Mobilde alt menünün üstüne oturur, bilgisayarda
+   zilin altında açılır. Header'a gömülü olmadığı için açık menü ya da
+   başka hiçbir katman üstünü örtemez. */
+.notif-sheet {
+  position: fixed;
+  z-index: 960;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
 @media (max-width: 767px) {
-  .notif-panel {
-    position: fixed;
+  .notif-sheet {
     left: 16px;
     right: 16px;
     top: auto;
     bottom: calc(72px + env(safe-area-inset-bottom, 0px));
-    width: auto;
     max-height: 65vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-    z-index: 950;
+  }
+}
+
+@media (min-width: 768px) {
+  .notif-sheet {
+    top: calc(var(--header-height) + 10px);
+    right: 24px;
+    width: min(320px, calc(100vw - 40px));
+    max-height: 60vh;
   }
 }

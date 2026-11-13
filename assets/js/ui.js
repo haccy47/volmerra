@@ -196,9 +196,6 @@
         ? '<span class="notif-badge">' + (unread > 9 ? "9+" : unread) + "</span>"
         : "") +
       "</button>" +
-      '<div class="notif-panel" hidden>' +
-      notifPanelHtml() +
-      "</div>" +
       "</div>"
     );
   }
@@ -390,60 +387,71 @@
     });
   }
 
-  /* Every bell on the page (desktop header bell AND the mobile top
-     bell) gets its own click handler bound to ITS OWN panel. The old
-     code wired only the FIRST match in the DOM — on a phone that was
-     the hidden desktop bell, so the visible mobile bell did nothing. */
+  /* ---------- Notifications: ONE shared sheet for every bell ----------
+     The panel no longer lives inside the header. It is a single card
+     at the document level: on phones it docks above the bottom nav,
+     on desktop it opens under the bell. Being outside the header
+     means the open mobile menu can never cover it, and stale z-index
+     /containing-block quirks can never hide it. */
+  var notifSheet = null;
+
+  function notifSheetEl() {
+    if (!notifSheet || !notifSheet.isConnected) {
+      notifSheet = document.createElement("div");
+      notifSheet.className = "notif-sheet";
+      document.body.appendChild(notifSheet);
+    }
+    return notifSheet;
+  }
+
+  function setNotifTogglesExpanded(open) {
+    document.querySelectorAll("[data-notif-toggle]").forEach(function (t) {
+      t.setAttribute("aria-expanded", String(open));
+    });
+  }
+
   function wireNotifications() {
     document.querySelectorAll("[data-notif-toggle]").forEach(function (toggle) {
-      var panel = toggle.parentElement.querySelector(".notif-panel");
-      if (!panel) return;
-
       toggle.addEventListener("click", function (event) {
         event.stopPropagation();
-        var wasHidden = panel.hidden;
-        document.querySelectorAll(".notif-panel").forEach(function (p) {
-          p.hidden = true;
-        });
-        panel.hidden = !wasHidden;
-        toggle.setAttribute("aria-expanded", String(panel.hidden === false));
-        if (panel.hidden === false) {
-          /* Opening the panel rebuilds it with the CURRENT session
-             state and marks everything as read. */
-          if (window.VolmerraNotifications) {
-            window.VolmerraNotifications.markAllRead();
-          }
-          panel.innerHTML = notifPanelHtml();
-          wireNotifications();
-          updateNotifBadges();
+        var sheet = notifSheetEl();
+        var wasOpen = !sheet.hidden;
+        sheet.hidden = true;
+        setNotifTogglesExpanded(false);
+        if (wasOpen) return;
+
+        /* İçeriği GÜNCEL oturumla kur: girişli kullanıcı kendi
+           bildirimlerini, çıkış yapmış olan giriş davetini görür.
+           Açılış görünür her şeyi okunmuş sayar. */
+        if (window.VolmerraNotifications && window.VolmerraAuth.currentUser()) {
+          window.VolmerraNotifications.markAllRead();
         }
+        sheet.innerHTML = notifPanelHtml();
+        wireNotifications();
+        sheet.hidden = false;
+        toggle.setAttribute("aria-expanded", "true");
       });
     });
 
-    document.querySelectorAll("[data-notif-read]").forEach(function (mark) {
+    document.querySelectorAll(".notif-sheet [data-notif-read]").forEach(function (mark) {
       mark.addEventListener("click", function () {
         if (window.VolmerraNotifications) {
           window.VolmerraNotifications.markAllRead();
-          document.querySelectorAll(".notif-panel").forEach(function (panel) {
-            panel.innerHTML = notifPanelHtml();
-          });
+          notifSheetEl().innerHTML = notifPanelHtml();
           wireNotifications();
-          updateNotifBadges();
         }
       });
     });
   }
 
-  /* Clicking anywhere outside a bell closes every open panel. Bound
-     ONCE at module level so re-wiring never stacks copies of it. */
+  /* Clicking anywhere else closes the sheet. Bound ONCE at module
+     level so re-wiring never stacks copies of this handler. */
   document.addEventListener("click", function (event) {
-    if (event.target.closest(".notif-wrap")) return;
-    document.querySelectorAll(".notif-panel").forEach(function (p) {
-      p.hidden = true;
-    });
-    document.querySelectorAll("[data-notif-toggle]").forEach(function (t) {
-      t.setAttribute("aria-expanded", "false");
-    });
+    if (event.target.closest("[data-notif-toggle]")) return;
+    if (!notifSheet || notifSheet.hidden) return;
+    if (event.target.closest(".notif-sheet")) return;
+    notifSheet.hidden = true;
+    setNotifTogglesExpanded(false);
   });
 
   function updateNotifBadges() {
